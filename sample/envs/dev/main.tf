@@ -1,18 +1,3 @@
-# 参考資料
-
-- [それ、どこに出しても恥ずかしくない
-Terraformコードになってるか？](https://esa-storage-tokyo.s3-ap-northeast-1.amazonaws.com/uploads/production/attachments/5809/2023/07/07/19598/c89126e6-8d48-4e34-a654-6fd29b63756e.pdf)
-
-# プロジェクト作成
-
-```bash
-cd sample
-mkdir -p envs/dev modules
-touch envs/dev/main.tf
-```
-
-```tf
-// --- --- --- envs/dev/main.tf --- --- ---
 terraform {
   required_providers {
     # AWS Provider
@@ -49,4 +34,3 @@ provider "aws" {
     }
   }
 }
-```
