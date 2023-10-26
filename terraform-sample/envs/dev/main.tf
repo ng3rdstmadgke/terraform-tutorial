@@ -14,9 +14,9 @@ terraform {
   #   https://developer.hashicorp.com/terraform/language/settings/backends/s3
   backend "s3" {
     # tfstate保存先のs3バケットとキー
-    bucket  = "tfstate-store-a5gnpkub"
+    bucket  = "terraform-tutorial-tfstate-store-a5gnpkub"
     region  = "ap-northeast-1"
-    key     = "terraform-tutorial/dev/terraform.tfstate"
+    key     = "dev/terraform.tfstate"
     encrypt = true
     # tfstateファイルのロック情報を管理するDynamoDBテーブル
     #   https://developer.hashicorp.com/terraform/language/settings/backends/s3#dynamodb-state-locking
@@ -35,11 +35,13 @@ provider "aws" {
   }
 }
 
+data "aws_caller_identity" "self" { }
+data "aws_region" "current" {}
+
 variable "vpc_id" { type = string }
 variable "subnets" { type = list(string) }
 variable "alb_subnets" { type = list(string) }
 variable "app_image_uri" {type = string}
-variable "app_image_tag" {type = string}
 
 locals {
   aws_region = data.aws_region.current.name
@@ -62,15 +64,15 @@ module "alb" {
   alb_subnets = var.alb_subnets
 }
 
-module "app" {
-  source = "../../modules/app"
-  app_name = local.app_name
-  stage = local.stage
-  account_id = local.account_id
-  app_image = var.app_image_uri
-  vpc_id = var.vpc_id
-  subnets = var.subnets
-  ingress_cidr_blocks = [local.vpc_cidr_block]
-  app_alb_arn = module.app_alb.alb.arn
-  env = local.env
-}
+#module "app" {
+#  source = "../../modules/app"
+#  app_name = local.app_name
+#  stage = local.stage
+#  account_id = local.account_id
+#  app_image = var.app_image_uri
+#  vpc_id = var.vpc_id
+#  subnets = var.subnets
+#  ingress_cidr_blocks = [local.vpc_cidr_block]
+#  app_alb_arn = module.app_alb.alb.arn
+#  env = local.env
+#}
