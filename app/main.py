@@ -8,6 +8,10 @@ app = FastAPI()
 def read_root():
     return {"message": "root"}
 
+@app.get("/healthcheck")
+def healthcheck():
+    return {"message": "healthy"}
+
 @app.get("/fibonacci")
 def fibonacci(cnt: int = 100):
     arr = [1, 1]
@@ -18,4 +22,3 @@ def fibonacci(cnt: int = 100):
 @app.get("/items/{item_id}")
 def read_item(item_id: int, q: Union[str, None] = None):
     return {"item_id": item_id, "q": q}
-

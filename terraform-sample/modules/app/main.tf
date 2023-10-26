@@ -325,7 +325,7 @@ resource "aws_ecs_task_definition" "app_task_definition" {
           value = v
         }
       ]
-      command = ["supervisord", "-c", "/etc/supervisor/supervisord.conf"]
+      command = ["/usr/local/bin/entrypoint.sh"]
 
       # 終了シグナル発進時、この秒数を超えてコンテナが終了しない場合は強制終了させる
       stopTimeout = 30

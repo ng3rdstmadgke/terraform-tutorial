@@ -71,5 +71,10 @@ terraform apply -auto-approve
 
 ```bash
 cd terraform-sample/dev
+
+# すべて削除
 terraform destroy
+
+# アプリリソースのみ削除
+terraform destroy -target=module.app
 ```

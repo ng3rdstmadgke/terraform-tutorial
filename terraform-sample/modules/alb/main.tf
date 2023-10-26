@@ -10,7 +10,7 @@ variable "ingress_rules_cidr_blocks" {
 /**
  * Output
  */
-output "alb" {
+output "app_alb" {
   value = aws_lb.app_alb
 }
 
