@@ -13,6 +13,12 @@
     "dockerfile": "Dockerfile"
   },
 
+  "runArgs": [
+      // NOTE: これがないとポートフォワード時にdevcontainerのポートをフォワーディングしてしまう。
+      //       ホストのポートをフォワーディングできるようにhostネットワークを利用する
+      "--network=host"
+  ],
+
   // Features to add to the dev container. More info: https://containers.dev/features.
   // "features": {},
 
