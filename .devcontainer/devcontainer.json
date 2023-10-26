@@ -4,15 +4,28 @@
   "name": "Ubuntu",
   // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
   // "image": "mcr.microsoft.com/devcontainers/base:jammy",
+
+  // features一覧: https://containers.dev/features
   "features": {
+    // NOTE: terraformを利用するための設定
+    //       https://github.com/devcontainers/features/tree/main/src/terraform
     "ghcr.io/devcontainers-contrib/features/terraform-asdf:2": {},
-    "docker-from-docker": { "version": "latest" }
+    // NOTE: docker outside of dockerを利用するための設定
+    //       https://github.com/devcontainers/features/tree/main/src/docker-outside-of-docker
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
+
   },
+
+  // devcontainerからgithubにsshを利用してpushするための設定
+  "mounts": [
+    "source=${localEnv:HOME}/.ssh,target=/home/vscode/.ssh,type=bind,consistency=cached"
+  ],
 
   "build": {
     "dockerfile": "Dockerfile"
   },
 
+  // docker run コマンドに追加する引数
   "runArgs": [
       // NOTE: これがないとポートフォワード時にdevcontainerのポートをフォワーディングしてしまう。
       //       ホストのポートをフォワーディングできるようにhostネットワークを利用する
