@@ -58,6 +58,37 @@ aws dynamodb create-table \
     --region $AWS_REGION
 ```
 
+# ■ CICD用アーティファクト保存バケット作成
+
+```bash
+CICD_BUCKET="terraform-tutorial-cicd-store-a5gnpkub"
+
+aws s3api create-bucket \
+  --bucket $CICD_BUCKET \
+  --region $AWS_REGION \
+  --create-bucket-configuration LocationConstraint=$AWS_REGION
+```
+
+# ■ CICDの起点となるリポジトリを作成
+
+
+```bash
+REPOSITORY_NAME="terraform-tutorial"
+
+aws codecommit create-repository \
+  --repository-name $REPOSITORY_NAME
+
+# リポジトリ情報を取得
+aws codecommit get-repository \
+  --repository-name $REPOSITORY_NAME
+
+# リモートリポジトリの登録
+git remote add codecommit リモートリポジトリのURL
+
+# プッシュ
+git push codecommit main
+```
+
 # ■ terraformデプロイ
 
 ```bash

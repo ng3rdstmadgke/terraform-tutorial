@@ -54,6 +54,8 @@ locals {
   app_name_lower = replace(lower(local.app_name), "-", "")
   stage    = "dev"
   vpc_cidr_block = "10.53.0.0/16"
+  repository_name= "terraform-tutorial"
+  cicd_artifact_bucket = "terraform-tutorial-cicd-artifact-store-a5gnpkub"
   env = {
     "APP_NAME": local.app_name,
     "STAGE": local.stage,
@@ -74,7 +76,7 @@ module "app" {
   app_name = local.app_name
   stage = local.stage
   account_id = local.account_id
-  app_image = var.app_image_uri
+  app_image_uri = var.app_image_uri
   vpc_id = var.vpc_id
   subnets = var.subnets
   ingress_cidr_blocks = [local.vpc_cidr_block]
@@ -91,3 +93,26 @@ module "monitoring" {
   app_tg_1_arn_suffix = module.app.tg_1.arn_suffix
   app_tg_2_arn_suffix = module.app.tg_2.arn_suffix
 }
+
+/*
+module "cicd" {
+  source = "../../modules/cicd"
+  app_name = local.app_name
+  stage = local.stage
+  aws_region = local.aws_region
+  account_id = local.account_id
+  vpc_id = var.vpc_id
+  subnets = var.subnets
+  app_image_uri = var.app_image_uri
+  ecs_cluster_name = module.app.ecs_cluster_name
+  ecs_service_name = module.app.ecs_service_name
+  app_tg_1_name = module.app.tg_1.name
+  app_tg_2_name = module.app.tg_2.name
+  lb_listener_green_arn = module.app.listener_green.arn
+  lb_listener_blue_arn = module.app.listener_blue.arn
+  cicd_artifact_bucket = local.cicd_artifact_bucket
+  repository_name = local.repository_name
+  ecs_task_family = module.app.ecs_task_family
+
+}
+*/

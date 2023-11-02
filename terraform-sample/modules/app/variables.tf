@@ -1,7 +1,7 @@
 variable "app_name" {}
 variable "stage" {}
 variable "account_id" {}
-variable "app_image" {}
+variable "app_image_uri" {}
 variable "vpc_id" {}
 variable "subnets" { type=list(string) }
 variable "ingress_cidr_blocks" {

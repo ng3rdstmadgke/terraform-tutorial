@@ -245,7 +245,7 @@ resource "aws_ecs_task_definition" "app_task_definition" {
   container_definitions = jsonencode([
     {
       name      = "app"
-      image     = var.app_image
+      image     = "${var.app_image_uri}:latest"
       cpu       = 1024  # コンテナが利用するCPU (1vCPU)
       memory    = 1024  # コンテナが利用するメモリ (1GB)
       essential = true  # essential=Trueのコンテナが停止した場合、タスク全体が停止する
