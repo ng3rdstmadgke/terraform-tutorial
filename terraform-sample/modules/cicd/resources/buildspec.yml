@@ -1,0 +1,61 @@
+# buildspecの構文
+#   https://docs.aws.amazon.com/ja_jp/codebuild/latest/userguide/build-spec-ref.html#build-spec-ref-syntax
+#
+# ビルド環境の環境変数 | AWS
+#   https://docs.aws.amazon.com/ja_jp/codebuild/latest/userguide/build-env-ref-env-vars.html
+#
+# ECSのローリングアップデートとブルー/グリーンデプロイで利用するファイルの比較 | DevelopersIO
+#   https://dev.classmethod.jp/articles/ecs-deploytype-files/
+#
+# セッションマネージャーでビルドコンテナに接続する方法
+#   https://docs.aws.amazon.com/ja_jp/codebuild/latest/userguide/session-manager.html
+#
+# DockerイメージをECRにプッシュする方法
+#   https://docs.aws.amazon.com/ja_jp/AmazonECR/latest/userguide/docker-push-ecr-image.html
+version: 0.2
+phases:
+  pre_build:
+    commands:
+      # ECRログイン
+      - echo Logging in to Amazon ECR...
+      - aws --version
+      - echo $AWS_DEFAULT_REGION
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
+      # jqインストール
+      - yum install -y jq
+      # イメージタグ作成
+      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - IMAGE_TAG=${COMMIT_HASH:=latest}
+      - echo $IMAGE_TAG
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Building the Docker image...
+      - |
+        docker build --rm \
+          -f docker/app/Dockerfile \
+          -t ${APP_IMAGE_URI}:latest \
+          .
+      - docker tag $APP_IMAGE_URI:latest $APP_IMAGE_URI:$IMAGE_TAG
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - docker push $APP_IMAGE_URI:latest
+      - docker push $APP_IMAGE_URI:$IMAGE_TAG
+      - printf '{"ImageURI":"%s"}' $APP_IMAGE_URI:$IMAGE_TAG > imageDetail.json
+      - bash terraform/modules/cicd/resources/create_appspec.sh $ECS_CLUSTER_NAME $ECS_SERVICE_NAME > appspec.yaml
+      - bash terraform/modules/cicd/resources/create_taskdef.sh $ECS_CLUSTER_NAME $ECS_SERVICE_NAME > taskdef.json
+      - cat imageDetail.json
+      - cat appspec.yaml
+      - cat taskdef.json
+artifacts:
+  files:
+    # Amazon ECS Blue/Green デプロイアクション用の imageDetail.json ファイル
+    #   https://docs.aws.amazon.com/ja_jp/codepipeline/latest/userguide/file-reference.html#file-reference-ecs-bluegreen
+    - imageDetail.json
+    # appspec.yaml の <TASK_DEFINITION> に展開されるタスク定義
+    #   https://docs.aws.amazon.com/ja_jp/codepipeline/latest/userguide/tutorials-ecs-ecr-codedeploy.html#tutorials-ecs-ecr-codedeploy-taskdefinition
+    - taskdef.json
+    # AppSpecAmazon ECS デプロイメントのファイル構造
+    #   https://docs.aws.amazon.com/ja_jp/codedeploy/latest/userguide/reference-appspec-file-structure.html#ecs-appspec-structure
+    - appspec.yaml

@@ -42,6 +42,7 @@ variable "vpc_id" { type = string }
 variable "subnets" { type = list(string) }
 variable "alb_subnets" { type = list(string) }
 variable "app_image_uri" {type = string}
+variable "cicd_artifact_bucket" {type = string}
 
 output "alb_host_name" {
   value = module.alb.app_alb.dns_name
@@ -55,7 +56,6 @@ locals {
   stage    = "dev"
   vpc_cidr_block = "10.53.0.0/16"
   repository_name= "terraform-tutorial"
-  cicd_artifact_bucket = "terraform-tutorial-cicd-artifact-store-a5gnpkub"
   env = {
     "APP_NAME": local.app_name,
     "STAGE": local.stage,
@@ -94,7 +94,6 @@ module "monitoring" {
   app_tg_2_arn_suffix = module.app.tg_2.arn_suffix
 }
 
-/*
 module "cicd" {
   source = "../../modules/cicd"
   app_name = local.app_name
@@ -110,9 +109,7 @@ module "cicd" {
   app_tg_2_name = module.app.tg_2.name
   lb_listener_green_arn = module.app.listener_green.arn
   lb_listener_blue_arn = module.app.listener_blue.arn
-  cicd_artifact_bucket = local.cicd_artifact_bucket
+  cicd_artifact_bucket = var.cicd_artifact_bucket
   repository_name = local.repository_name
   ecs_task_family = module.app.ecs_task_family
-
 }
-*/

@@ -61,7 +61,7 @@ aws dynamodb create-table \
 # ■ CICD用アーティファクト保存バケット作成
 
 ```bash
-CICD_BUCKET="terraform-tutorial-cicd-store-a5gnpkub"
+CICD_BUCKET="terraform-tutorial-cicd-artifact-store-a5gnpkub"
 
 aws s3api create-bucket \
   --bucket $CICD_BUCKET \
