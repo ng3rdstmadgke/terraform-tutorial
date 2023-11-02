@@ -44,8 +44,6 @@ phases:
       - docker push $APP_IMAGE_URI:$IMAGE_TAG
       - printf '{"ImageURI":"%s"}' $APP_IMAGE_URI:$IMAGE_TAG > imageDetail.json
       # NOTE: 本番用のディレクトリはterraform/...
-      #- bash terraform-sample/modules/cicd/resources/create_appspec.sh $ECS_CLUSTER_NAME $ECS_SERVICE_NAME > appspec.yaml
-      #- bash terraform-sample/modules/cicd/resources/create_taskdef.sh $ECS_CLUSTER_NAME $ECS_SERVICE_NAME > taskdef.json
       - cat terraform-sample/envs/${STAGE}/appspec.yml > appspec.yaml
       - cat terraform-sample/envs/${STAGE}/taskdef.json > taskdef.json
       # 確認
