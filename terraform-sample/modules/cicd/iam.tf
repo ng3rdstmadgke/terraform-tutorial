@@ -439,3 +439,45 @@ resource "aws_iam_role_policy_attachment" "attach_codepipeline_service_policy" {
   role       = aws_iam_role.codepipeline_service_role.name
   policy_arn = aws_iam_policy.codepipeline_service_policy.arn
 }
+
+/**
+ * CodePipelineのトリガーとして利用するEventBridgeのサービスロール
+ */
+resource "aws_iam_role" "event_bridge_codepipeline" {
+  name               = "${var.app_name}-${var.stage}-EventBridgeCodepipelineTrigerRole"
+  assume_role_policy = jsonencode({
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Principal": {
+          "Service": "events.amazonaws.com",
+        },
+        "Action": "sts:AssumeRole",
+      }
+    ]
+  })
+}
+resource "aws_iam_policy" "event_bridge_codepipeline_policy" {
+  name = "${var.app_name}-${var.stage}-EventBridgeCodepipelineTrigerPolicy"
+  policy = jsonencode({
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Action": [
+          "codepipeline:StartPipelineExecution"
+        ],
+        "Resource": [
+          "${aws_codepipeline.this.arn}"
+        ],
+        "Effect": "Allow"
+      }
+    ]
+
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "attach_event_bridge_codepipeline_policy" {
+  role       = aws_iam_role.event_bridge_codepipeline.name
+  policy_arn = aws_iam_policy.event_bridge_codepipeline_policy.arn
+}

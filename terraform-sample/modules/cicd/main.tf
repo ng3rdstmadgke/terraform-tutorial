@@ -187,6 +187,28 @@ resource "aws_codedeploy_deployment_group" "this" {
 
 }
 
+# cloudwatch event rule
+resource "aws_cloudwatch_event_rule" "codepipeline_trigger" {
+  name = "${var.app_name}-${var.stage}-codepipeline-trigger"
+
+  event_pattern = jsonencode({
+    "source": ["aws.codecommit"],
+    "detail-type": ["CodeCommit Repository State Change"],
+    "resources": ["arn:aws:codecommit:${var.aws_region}:${var.account_id}:${var.repository_name}"],
+    "detail": {
+      "event": ["referenceCreated", "referenceUpdated"],
+      "referenceType": ["branch"],
+      "referenceName": ["${var.stage}"]
+    }
+  })
+}
+
+resource "aws_cloudwatch_event_target" "codepipeline_trigger" {
+  rule     = aws_cloudwatch_event_rule.codepipeline_trigger.name
+  arn      = aws_codepipeline.this.arn
+  role_arn = aws_iam_role.event_bridge_codepipeline.arn
+}
+
 /**
  * CodePipeline
  *
@@ -226,6 +248,8 @@ resource "aws_codepipeline" "this" {
         RepositoryName       = var.repository_name
         # ソースの変更が検出されるブランチ名
         BranchName           = var.stage
+        # ソースの変更はEventBridgeで検出するので、CodePipelineによるポーリングは不要
+        PollForSourceChanges = "false"
       }
     }
   }
