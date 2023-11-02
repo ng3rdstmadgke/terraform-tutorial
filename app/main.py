@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from typing import Union
-from logging import config, getLogger, LogRecord, Filter as LoggingFilter,
+from logging import config, getLogger, LogRecord, Filter as LoggingFilter
 
 # /healthcheck へのアクセスはログ出力しないようにする
 class HealthCheckFilter(LoggingFilter):
