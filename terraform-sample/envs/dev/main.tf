@@ -121,24 +121,18 @@ module "cicd" {
 # https://registry.terraform.io/providers/hashicorp/local/latest/docs/resources/file
 resource "local_file" "appspec_yml" {
   filename = "appspec.yml"
-  content  = yamlencode({
-    version = "0.0"
-    Resources = [
-      {
-        TargetService = {
-          Type = "AWS::ECS::Service"
-          Properties = {
-            PlatformVersion = "1.4.0"
-            TaskDefinition = "<TASK_DEFINITION>"
-            LoadBalancerInfo = {
-              ContainerName = "${module.app.container_name}"
-              ContainerPort = module.app.container_port
-            }
-          }
-        }
-      }
-    ]
-  })
+  content  = <<EOF
+version: 0.0
+Resources:
+  - TargetService:
+      Type: AWS::ECS::Service
+      Properties:
+        TaskDefinition: <TASK_DEFINITION>
+        LoadBalancerInfo:
+          ContainerName: "${module.app.container_name}"
+          ContainerPort: ${module.app.container_port}
+        PlatformVersion: "1.4.0"
+EOF
 }
 
 # https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource
