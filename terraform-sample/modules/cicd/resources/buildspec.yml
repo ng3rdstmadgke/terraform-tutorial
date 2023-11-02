@@ -43,8 +43,9 @@ phases:
       - docker push $APP_IMAGE_URI:latest
       - docker push $APP_IMAGE_URI:$IMAGE_TAG
       - printf '{"ImageURI":"%s"}' $APP_IMAGE_URI:$IMAGE_TAG > imageDetail.json
-      - bash terraform/modules/cicd/resources/create_appspec.sh $ECS_CLUSTER_NAME $ECS_SERVICE_NAME > appspec.yaml
-      - bash terraform/modules/cicd/resources/create_taskdef.sh $ECS_CLUSTER_NAME $ECS_SERVICE_NAME > taskdef.json
+      # NOTE: 本番用のディレクトリはterraform/...
+      - bash terraform-sample/modules/cicd/resources/create_appspec.sh $ECS_CLUSTER_NAME $ECS_SERVICE_NAME > appspec.yaml
+      - bash terraform-sample/modules/cicd/resources/create_taskdef.sh $ECS_CLUSTER_NAME $ECS_SERVICE_NAME > taskdef.json
       - cat imageDetail.json
       - cat appspec.yaml
       - cat taskdef.json
