@@ -42,10 +42,10 @@ phases:
       - echo Build completed on `date`
       - docker push $APP_IMAGE_URI:latest
       - docker push $APP_IMAGE_URI:$IMAGE_TAG
+      # Amazon ECS Blue/Green デプロイアクションに必要なファイルを生成
       - printf '{"ImageURI":"%s"}' $APP_IMAGE_URI:$IMAGE_TAG > imageDetail.json
-      # NOTE: 本番用のディレクトリはterraform/...
-      - cat terraform-sample/envs/${STAGE}/appspec.yml > appspec.yaml
-      - cat terraform-sample/envs/${STAGE}/taskdef.json > taskdef.json
+      - cat tfexports/${STAGE}/appspec.yaml > appspec.yaml
+      - cat tfexports/${STAGE}/taskdef.json > taskdef.json
       # 確認
       - cat appspec.yaml
       - cat taskdef.json

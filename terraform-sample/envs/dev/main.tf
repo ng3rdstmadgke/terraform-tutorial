@@ -118,9 +118,20 @@ module "cicd" {
   ecs_task_family = module.app.ecs_task_family
 }
 
-# https://registry.terraform.io/providers/hashicorp/local/latest/docs/resources/file
+resource "null_resource" "make_dir" {
+  # https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource
+  triggers = {
+    always_run = timestamp()
+  }
+  provisioner "local-exec" {
+    command = "mkdir -p ../../../tfexports/${local.stage}"
+  }
+}
+
+# appspec.ymlを作成
 resource "local_file" "appspec_yml" {
-  filename = "appspec.yml"
+  # https://registry.terraform.io/providers/hashicorp/local/latest/docs/resources/file
+  filename = "../../../tfexports/${local.stage}/appspec.yaml"
   content  = <<EOF
 version: 0.0
 Resources:
@@ -133,14 +144,25 @@ Resources:
           ContainerPort: ${module.app.container_port}
         PlatformVersion: "1.4.0"
 EOF
+
+  depends_on = [ null_resource.make_dir ]
 }
 
-# https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource
+# taskdef.jsonを作成
 resource "null_resource" "run_script" {
+  # https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource
   triggers = {
     always_run = timestamp()
   }
   provisioner "local-exec" {
-    command = "aws ecs describe-task-definition --task-definition ${module.app.ecs_task_family}:${module.app.ecs_task_revision} --query 'taskDefinition' --output json | jq -r '.containerDefinitions[0].image=\"<IMAGE1_NAME>\"' > taskdef.json"
+    command = <<EOF
+aws ecs describe-task-definition \
+  --task-definition ${module.app.ecs_task_family}:${module.app.ecs_task_revision} \
+  --query 'taskDefinition' \
+  --output json |
+jq -r '.containerDefinitions[0].image="<IMAGE1_NAME>"' \
+> ../../../tfexports/${local.stage}/taskdef.json
+EOF
   }
+  depends_on = [ null_resource.make_dir ]
 }
