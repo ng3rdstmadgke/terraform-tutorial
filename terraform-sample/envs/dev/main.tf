@@ -128,6 +128,7 @@ resource "local_file" "appspec_yml" {
         TargetService = {
           Type = "AWS::ECS::Service"
           Properties = {
+            PlatformVersion = "1.4.0"
             TaskDefinition = "<TASK_DEFINITION>"
             LoadBalancerInfo = {
               ContainerName = "${module.app.container_name}"
@@ -140,9 +141,12 @@ resource "local_file" "appspec_yml" {
   })
 }
 
-# https://developer.hashicorp.com/terraform/language/resources/provisioners/syntax#destroy-time-provisioners
+# https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource
 resource "null_resource" "run_script" {
+  triggers = {
+    always_run = timestamp()
+  }
   provisioner "local-exec" {
-    command = "aws ecs describe-task-definition --task-definition ${module.app.ecs_task_family}:${module.app.ecs_task_revision} --output json | jq -r '.containerDefinitions[0].image=\"<IMAGE1_NAME>\"' > taskdef.json"
+    command = "aws ecs describe-task-definition --task-definition ${module.app.ecs_task_family}:${module.app.ecs_task_revision} --query 'taskDefinition' --output json | jq -r '.containerDefinitions[0].image=\"<IMAGE1_NAME>\"' > taskdef.json"
   }
 }
