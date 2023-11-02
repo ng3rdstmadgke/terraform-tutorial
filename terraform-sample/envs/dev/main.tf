@@ -50,7 +50,8 @@ output "alb_host_name" {
 locals {
   aws_region = data.aws_region.current.name
   account_id = data.aws_caller_identity.self.account_id
-  app_name = "terraform-tutorial"
+  app_name = "TerraformTutorial"
+  app_name_lower = replace(lower(local.app_name), "-", "")
   stage    = "dev"
   vpc_cidr_block = "10.53.0.0/16"
   env = {
@@ -79,4 +80,14 @@ module "app" {
   ingress_cidr_blocks = [local.vpc_cidr_block]
   app_alb_arn = module.alb.app_alb.arn
   env = local.env
+}
+
+module "monitoring" {
+  source = "../../modules/monitoring"
+  app_name = local.app_name_lower
+  stage = local.stage
+  ecs_cluster_name = module.app.ecs_cluster_name
+  ecs_service_name = module.app.ecs_service_name
+  app_tg_1_arn_suffix = module.app.tg_1.arn_suffix
+  app_tg_2_arn_suffix = module.app.tg_2.arn_suffix
 }
