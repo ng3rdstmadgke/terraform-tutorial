@@ -61,7 +61,7 @@ aws dynamodb create-table \
 # ■ terraformデプロイ
 
 ```bash
-cd terraform-sample/dev
+cd terraform-sample/envs/dev
 terraform init
 terraform plan
 terraform apply -auto-approve
@@ -70,7 +70,7 @@ terraform apply -auto-approve
 # ■ リソースの削除
 
 ```bash
-cd terraform-sample/dev
+cd terraform-sample/envs/dev
 
 # すべて削除
 terraform destroy

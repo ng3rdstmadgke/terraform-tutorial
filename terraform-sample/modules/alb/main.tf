@@ -1,19 +1,3 @@
-variable "app_name" {}
-variable "stage" {}
-variable "vpc_id" {}
-variable "alb_subnets" { type = list(string) }
-variable "ingress_rules_cidr_blocks" {
-  type    = list(string)
-  default = ["0.0.0.0/0"]
-}
-
-/**
- * Output
- */
-output "app_alb" {
-  value = aws_lb.app_alb
-}
-
 /**
  * ALB用セキュリティグループ
  * aws_security_group: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group
