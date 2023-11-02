@@ -244,14 +244,14 @@ resource "aws_ecs_task_definition" "app_task_definition" {
   #   - https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_ContainerDefinition.html
   container_definitions = jsonencode([
     {
-      name      = "app"
+      name      = local.container_name
       image     = "${var.app_image_uri}:latest"
       cpu       = 1024  # コンテナが利用するCPU (1vCPU)
       memory    = 1024  # コンテナが利用するメモリ (1GB)
       essential = true  # essential=Trueのコンテナが停止した場合、タスク全体が停止する
       portMappings = [
         {
-          containerPort = 80
+          containerPort = local.container_port
           hostPort      = 80
         }
       ]

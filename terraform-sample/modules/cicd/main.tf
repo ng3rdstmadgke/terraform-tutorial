@@ -78,6 +78,10 @@ resource "aws_codebuild_project" "this" {
       name  = "ECS_SERVICE_NAME"
       value = var.ecs_service_name
     }
+    environment_variable {
+      name  = "STAGE"
+      value = var.stage
+    }
   }
 
   vpc_config {

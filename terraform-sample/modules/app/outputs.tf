@@ -35,3 +35,11 @@ output "listener_green" {
 output "listener_blue" {
   value = aws_lb_listener.app_listener_blue
 }
+
+output "container_name" {
+  value = local.container_name
+}
+
+output "container_port" {
+  value = local.container_port
+}

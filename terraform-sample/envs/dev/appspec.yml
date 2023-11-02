@@ -1,0 +1,9 @@
+"Resources":
+- "TargetService":
+    "Properties":
+      "LoadBalancerInfo":
+        "ContainerName": "app"
+        "ContainerPort": 80
+      "TaskDefinition": "<TASK_DEFINITION>"
+    "Type": "AWS::ECS::Service"
+"version": "0.0"

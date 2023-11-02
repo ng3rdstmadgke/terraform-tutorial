@@ -19,4 +19,6 @@ variable "certificate_arn" {
 locals {
   use_https_listener = length(var.certificate_arn) > 0  ? "1" : "0"
   use_http_listener  = length(var.certificate_arn) <= 0 ? "1" : "0"
+  container_name = "app"
+  container_port = 80
 }

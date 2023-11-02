@@ -48,6 +48,10 @@ output "alb_host_name" {
   value = module.alb.app_alb.dns_name
 }
 
+output "task_definition" {
+  value = "${module.app.ecs_task_family}:${module.app.ecs_task_revision}"
+}
+
 locals {
   aws_region = data.aws_region.current.name
   account_id = data.aws_caller_identity.self.account_id
@@ -112,4 +116,33 @@ module "cicd" {
   cicd_artifact_bucket = var.cicd_artifact_bucket
   repository_name = local.repository_name
   ecs_task_family = module.app.ecs_task_family
+}
+
+# https://registry.terraform.io/providers/hashicorp/local/latest/docs/resources/file
+resource "local_file" "appspec_yml" {
+  filename = "appspec.yml"
+  content  = yamlencode({
+    version = "0.0"
+    Resources = [
+      {
+        TargetService = {
+          Type = "AWS::ECS::Service"
+          Properties = {
+            TaskDefinition = "<TASK_DEFINITION>"
+            LoadBalancerInfo = {
+              ContainerName = "${module.app.container_name}"
+              ContainerPort = module.app.container_port
+            }
+          }
+        }
+      }
+    ]
+  })
+}
+
+# https://developer.hashicorp.com/terraform/language/resources/provisioners/syntax#destroy-time-provisioners
+resource "null_resource" "run_script" {
+  provisioner "local-exec" {
+    command = "aws ecs describe-task-definition --task-definition ${module.app.ecs_task_family}:${module.app.ecs_task_revision} --output json | jq -r '.containerDefinitions[0].image=\"<IMAGE1_NAME>\"' > taskdef.json"
+  }
 }

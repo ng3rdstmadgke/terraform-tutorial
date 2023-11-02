@@ -1,0 +1,125 @@
+{
+  "taskDefinition": {
+    "taskDefinitionArn": "arn:aws:ecs:ap-northeast-1:674582907715:task-definition/TerraformTutorial-dev-app:2",
+    "containerDefinitions": [
+      {
+        "name": "app",
+        "image": "674582907715.dkr.ecr.ap-northeast-1.amazonaws.com/terraform-tutorial/dev/app:latest",
+        "cpu": 1024,
+        "memory": 1024,
+        "portMappings": [
+          {
+            "containerPort": 80,
+            "hostPort": 80,
+            "protocol": "tcp"
+          }
+        ],
+        "essential": true,
+        "command": [
+          "/usr/local/bin/entrypoint.sh"
+        ],
+        "environment": [
+          {
+            "name": "APP_NAME",
+            "value": "TerraformTutorial"
+          },
+          {
+            "name": "STAGE",
+            "value": "dev"
+          }
+        ],
+        "mountPoints": [],
+        "volumesFrom": [],
+        "stopTimeout": 30,
+        "logConfiguration": {
+          "logDriver": "awslogs",
+          "options": {
+            "awslogs-group": "TerraformTutorial/dev/app/ecs-task",
+            "awslogs-region": "ap-northeast-1",
+            "awslogs-stream-prefix": "app"
+          }
+        },
+        "healthCheck": {
+          "command": [
+            "CMD-SHELL",
+            "curl -H 'User-Agent: Docker-HealthChecker' -f 'http://localhost/healthcheck' || exit 1"
+          ],
+          "interval": 15,
+          "timeout": 5,
+          "retries": 3,
+          "startPeriod": 30
+        }
+      }
+    ],
+    "family": "TerraformTutorial-dev-app",
+    "taskRoleArn": "arn:aws:iam::674582907715:role/TerraformTutorial-dev-EcsTaskRole",
+    "executionRoleArn": "arn:aws:iam::674582907715:role/TerraformTutorial-dev-EcsTaskExecutionRole",
+    "networkMode": "awsvpc",
+    "revision": 2,
+    "volumes": [],
+    "status": "ACTIVE",
+    "requiresAttributes": [
+      {
+        "name": "com.amazonaws.ecs.capability.logging-driver.awslogs"
+      },
+      {
+        "name": "ecs.capability.execution-role-awslogs"
+      },
+      {
+        "name": "com.amazonaws.ecs.capability.ecr-auth"
+      },
+      {
+        "name": "com.amazonaws.ecs.capability.docker-remote-api.1.19"
+      },
+      {
+        "name": "com.amazonaws.ecs.capability.task-iam-role"
+      },
+      {
+        "name": "ecs.capability.container-health-check"
+      },
+      {
+        "name": "ecs.capability.container-ordering"
+      },
+      {
+        "name": "ecs.capability.execution-role-ecr-pull"
+      },
+      {
+        "name": "ecs.capability.extensible-ephemeral-storage"
+      },
+      {
+        "name": "com.amazonaws.ecs.capability.docker-remote-api.1.18"
+      },
+      {
+        "name": "ecs.capability.task-eni"
+      },
+      {
+        "name": "com.amazonaws.ecs.capability.docker-remote-api.1.29"
+      }
+    ],
+    "placementConstraints": [],
+    "compatibilities": [
+      "EC2",
+      "FARGATE"
+    ],
+    "runtimePlatform": {
+      "cpuArchitecture": "X86_64",
+      "operatingSystemFamily": "LINUX"
+    },
+    "requiresCompatibilities": [
+      "FARGATE"
+    ],
+    "cpu": "2048",
+    "memory": "4096",
+    "registeredAt": "2023-11-02T08:30:21.560000+00:00",
+    "registeredBy": "arn:aws:sts::674582907715:assumed-role/BeeXEc2PowerUserAccessRole/i-0b5b69ec148d207f6",
+    "ephemeralStorage": {
+      "sizeInGiB": 32
+    }
+  },
+  "tags": [],
+  "containerDefinitions": [
+    {
+      "image": "<IMAGE1_NAME>"
+    }
+  ]
+}
