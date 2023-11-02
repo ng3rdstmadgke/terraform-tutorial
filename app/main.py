@@ -1,7 +1,17 @@
-
 from fastapi import FastAPI
 from typing import Union
+from logging import config, getLogger, LogRecord, Filter as LoggingFilter,
 
+# /healthcheck へのアクセスはログ出力しないようにする
+class HealthCheckFilter(LoggingFilter):
+    def filter(self, record: LogRecord) -> bool:
+        return record.getMessage().find("/healthcheck") == -1
+
+logger = getLogger()
+getLogger("uvicorn.access").addFilter(HealthCheckFilter())
+
+
+# APIの定義
 app = FastAPI()
 
 @app.get("/")

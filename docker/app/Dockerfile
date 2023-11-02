@@ -1,6 +1,6 @@
 FROM python:3.10-slim-bookworm
 RUN apt update && \
-    apt install -y locales && \
+    apt install -y locales curl && \
     apt upgrade -y
 RUN echo 'ja_JP.UTF-8 UTF-8' >> /etc/locale.gen && \
     locale-gen && \
