@@ -66,6 +66,19 @@ locals {
   }
 }
 
+module "db" {
+  source   = "../../modules/db"
+  app_name = local.app_name_lower
+  stage    = local.stage
+  vpc_id   = var.vpc_id
+  subnets  = var.subnets
+  db_name  = local.stage
+  db_user  = "sysadmin"
+  db_password = "sysadmin1234"
+  ingress_cidr_blocks = [local.vpc_cidr_block]
+  instance_num = 2
+}
+
 
 module "alb" {
   source      = "../../modules/alb"
