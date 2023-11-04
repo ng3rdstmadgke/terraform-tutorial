@@ -7,3 +7,7 @@ alb_subnets = ["subnet-xxxxxxxxxxxxxxxxx", "subnet-xxxxxxxxxxxxxxxxx"]
 app_image_uri = "xxxxxxxxxxxx.dkr.ecr.ap-northeast-1.amazonaws.com/xxxxxxxxxxxxxxxxxxxxxxxxxx"
 
 cicd_artifact_bucket = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+
+db_user = "xxxxxxxxxxx"
+
+db_password = "xxxxxxxxxxx"

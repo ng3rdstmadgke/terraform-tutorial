@@ -43,6 +43,8 @@ variable "subnets" { type = list(string) }
 variable "alb_subnets" { type = list(string) }
 variable "app_image_uri" {type = string}
 variable "cicd_artifact_bucket" {type = string}
+variable "db_user" { type = string}
+variable "db_password" {type = string}
 
 output "alb_host_name" {
   value = module.alb.app_alb.dns_name
@@ -55,8 +57,7 @@ output "task_definition" {
 locals {
   aws_region = data.aws_region.current.name
   account_id = data.aws_caller_identity.self.account_id
-  app_name = "terraformtutorial"
-  # app_name_lower = replace(lower(local.app_name), "-", "")
+  app_name = replace(lower("terraformtutorial"), "-", "")
   stage    = "dev"
   vpc_cidr_block = "10.53.0.0/16"
   repository_name= "terraform-tutorial"
@@ -73,8 +74,8 @@ module "db" {
   vpc_id   = var.vpc_id
   subnets  = var.subnets
   db_name  = local.stage
-  db_user  = "sysadmin"
-  db_password = "sysadmin1234"
+  db_user  = var.db_user
+  db_password = var.db_password
   ingress_cidr_blocks = [local.vpc_cidr_block]
   instance_num = 2
 }
