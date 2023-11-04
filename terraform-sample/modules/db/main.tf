@@ -105,6 +105,11 @@ resource "aws_rds_cluster" "aurora_serverless_mysql80" {
     max_capacity = 1.0  // ~ 128
   }
 
+  // 削除時にスナップショットを作成しな時
+  skip_final_snapshot = true
+  // スナップショットを取得したい場合は final_snapshot_identifier が必要
+  #final_snapshot_identifier = "${var.app_name}-${var.stage}-aurora-serverless-v2-mysql80-cluster-final-snapshot-${timestamp()}"
+
   lifecycle {
     ignore_changes = [
       master_password // パスワードが変更されていても無視する
