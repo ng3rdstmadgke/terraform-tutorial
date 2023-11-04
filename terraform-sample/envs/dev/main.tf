@@ -55,8 +55,8 @@ output "task_definition" {
 locals {
   aws_region = data.aws_region.current.name
   account_id = data.aws_caller_identity.self.account_id
-  app_name = "TerraformTutorial"
-  app_name_lower = replace(lower(local.app_name), "-", "")
+  app_name = "terraformtutorial"
+  # app_name_lower = replace(lower(local.app_name), "-", "")
   stage    = "dev"
   vpc_cidr_block = "10.53.0.0/16"
   repository_name= "terraform-tutorial"
@@ -68,7 +68,7 @@ locals {
 
 module "db" {
   source   = "../../modules/db"
-  app_name = local.app_name_lower
+  app_name = local.app_name
   stage    = local.stage
   vpc_id   = var.vpc_id
   subnets  = var.subnets
@@ -103,7 +103,7 @@ module "app" {
 
 module "monitoring" {
   source = "../../modules/monitoring"
-  app_name = local.app_name_lower
+  app_name = local.app_name
   stage = local.stage
   ecs_cluster_name = module.app.ecs_cluster_name
   ecs_service_name = module.app.ecs_service_name

@@ -18,7 +18,7 @@ resource "aws_iam_role" "codebuild_service_role" {
   })
   lifecycle {
     # NOTE: CICDアーティファクト用バケットのバケットポリシーのConditionにRoleIdを利用しているので削除してはいけない
-    prevent_destroy = true
+    #prevent_destroy = true
   }
 }
 
@@ -253,7 +253,7 @@ resource "aws_iam_role" "codedeploy_service_role" {
   })
   lifecycle {
     # NOTE: CICDアーティファクト用バケットのバケットポリシーのConditionにRoleIdを利用しているので削除してはいけない
-    prevent_destroy = true
+    #prevent_destroy = true
   }
 }
 
@@ -282,7 +282,7 @@ resource "aws_iam_role" "codepipeline_service_role" {
   })
   lifecycle {
     # NOTE: CICDアーティファクト用バケットのバケットポリシーのConditionにRoleIdを利用しているので削除してはいけない
-    prevent_destroy = true
+    #prevent_destroy = true
   }
 }
 
