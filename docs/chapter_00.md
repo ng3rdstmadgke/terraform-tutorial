@@ -2,25 +2,70 @@ Chapter0 概要・前準備
 ---
 [READMEに戻る](../README.md)
 
+# ■ 0. Requirements
+
+### 1. ホストマシンにdockerをインストールしてください  
+
+[Install Docker Engine | docker docs](https://docs.docker.com/engine/install/)
+
+### 2. vscodeのdevcontainerを利用できるようにしておいてください
+
+このリポジトリはvscodeのdevcontainerで操作されることを前提としています
+
+### 3. ホストにAWSのクレデンシャルを設定してください
+
+`~/.aws/credentials` , `~/.aws/config` を作成してください。  
+※ EC2上で動作させる場合は、インスタンスロールが利用されるので、これらのファイルを作成する必要はありません。
+
+
+
+### 3. サブネットを準備してください
+
+インターネットに疎通可能なPublicサブネット(2AZ)とPrivateサブネット(2AZ)を用意してください
+
+<img src="img/00/subnets.png" width="500px">
+
+
+
 # ■ 1. 概要
 
 このチュートリアルでは下記のような構成のアプリケーションをTerraformで作成します。
 
-![アーキテクチャ](img/drawio/architecture.drawio.png)
+<img src="img/00/drawio/architecture.drawio.png" width="900px">
+
+
+## 今回動かすアプリケーションをローカルで起動してみましょう
+
+
+```bash
+# アプリの起動
+./bin/run.sh
+```
+
+ブラウザで http://localhost/docs にアクセスしてみましょう。  
+下記のようなFastAPIの画面が表示されるはずです。
+
+<img src="img/00/fastapi_docs.png" width="700px">
 
 
 
 
 # ■ 2. 前準備
 
+アプリケーションのデプロイに必要なリソースを作成しておきましょう。  
+※ インターネットに疎通可能なPublicサブネット(2AZ)とPrivateサブネット(2AZ)は存在する前提です。
+
 
 ```bash
+# 変数定義
 STAGE=dev
 AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
 AWS_REGION="ap-northeast-1"
 ```
 
 ## ECRリポジトリの作成 ~ プッシュ
+
+アプリケーションのイメージを保存するECRリポジトリを作成します。
 
 ```bash
 REPOSITORY_NAME="terraform-tutorial/${STAGE}/app"
@@ -44,10 +89,12 @@ docker push $REMOTE_REPOSITORY_NAME
 
 # ■ tfstate管理用s3バケット作成
 
+terraformのtfstateを管理するS3バケットを作成します。
+
 ```bash
 # tfstateファイルをS3で管理する
 # https://developer.hashicorp.com/terraform/language/settings/backends/s3
-TFSTATE_BUCKET="terraform-tutorial-tfstate-store-a5gnpkub"
+TFSTATE_BUCKET="xxxxxxxxxxxxxxxxx"
 
 aws s3api create-bucket \
   --bucket $TFSTATE_BUCKET \
@@ -58,11 +105,13 @@ aws s3api create-bucket \
 
 # ■ tfstateロック用のdynamodbテーブルを作成
 
+terraformを複数個所から同時にデプロイできないように、dynamoDBにtfstateをロックするためのテーブルを作成します。
+
 ```bash
 # tfstateファイルのロック情報をDynamoDBで管理する
 # https://developer.hashicorp.com/terraform/language/settings/backends/s3#dynamodb-state-locking
 
-TFSTATE_LOCK_TABLE="terraform-tutorial-tfstate-lock"
+TFSTATE_LOCK_TABLE="xxxxxxxxxxxxxxxxx"
 
 aws dynamodb create-table \
     --table-name $TFSTATE_LOCK_TABLE \
@@ -75,7 +124,7 @@ aws dynamodb create-table \
 # ■ CICD用アーティファクト保存バケット作成
 
 ```bash
-CICD_BUCKET="terraform-tutorial-cicd-artifact-store-a5gnpkub"
+CICD_BUCKET="xxxxxxxxxxxxxxxxx"
 
 aws s3api create-bucket \
   --bucket $CICD_BUCKET \
