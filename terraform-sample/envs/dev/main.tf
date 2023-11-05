@@ -77,7 +77,7 @@ module "db" {
   db_user  = var.db_user
   db_password = var.db_password
   ingress_cidr_blocks = [local.vpc_cidr_block]
-  instance_num = 2
+  instance_num = 1
 }
 
 
