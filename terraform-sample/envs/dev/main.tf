@@ -1,25 +1,23 @@
 terraform {
   required_providers {
-    # AWS Provider
-    #   https://registry.terraform.io/providers/hashicorp/aws/latest/docs
+    // AWS Provider: https://registry.terraform.io/providers/hashicorp/aws/latest/docs
     aws = {
       source  = "hashicorp/aws"
       version = "~> 5.0"
     }
   }
 
+  // terraformのバージョン指定
   required_version = ">= 1.2.0"
 
-  # backends S3
-  #   https://developer.hashicorp.com/terraform/language/settings/backends/s3
+  // tfstateファイルをs3で管理する: https://developer.hashicorp.com/terraform/language/settings/backends/s3
   backend "s3" {
-    # tfstate保存先のs3バケットとキー
+    // tfstate保存先のs3バケットとキー
     bucket  = "terraform-tutorial-tfstate-store-a5gnpkub"
     region  = "ap-northeast-1"
     key     = "dev/terraform.tfstate"
     encrypt = true
-    # tfstateファイルのロック情報を管理するDynamoDBテーブル
-    #   https://developer.hashicorp.com/terraform/language/settings/backends/s3#dynamodb-state-locking
+    // tfstateファイルのロック情報をDynamoDBで管理する: https://developer.hashicorp.com/terraform/language/settings/backends/s3#dynamodb-state-locking
     dynamodb_table = "terraform-tutorial-tfstate-lock"
   }
 }
@@ -27,7 +25,7 @@ terraform {
 provider "aws" {
   region = "ap-northeast-1"
 
-  # すべてのリソースにデフォルトで設定するタグ
+  // すべてのリソースにデフォルトで設定するタグ
   default_tags {
     tags = {
       PROJECT_NAME = "TERRAFORM_TUTORIAL_D"
@@ -35,7 +33,12 @@ provider "aws" {
   }
 }
 
+// Data Source: aws_caller_identity: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity
+// Terraformが認可されているアカウントの情報を取得するデータソース
 data "aws_caller_identity" "self" {}
+
+// Data Source: aws_region: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region
+// 現在のリージョンを取得するデータソース
 data "aws_region" "current" {}
 
 variable "vpc_id" { type = string }
