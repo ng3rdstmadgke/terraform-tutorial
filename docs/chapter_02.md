@@ -156,6 +156,11 @@ locals {
   stage           = "ステージ名"
 }
 
+// 出力
+output "alb_host_name" {
+  value = module.alb.app_alb.dns_name
+}
+
 // albモジュールを利用
 module "alb" {
   source      = "../../modules/alb"

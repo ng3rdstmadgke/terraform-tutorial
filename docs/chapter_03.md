@@ -687,12 +687,20 @@ locals {
   aws_region      = data.aws_region.current.name
   account_id      = data.aws_caller_identity.self.account_id
   app_name        = replace(lower("terraformtutorial"), "-", "")
-  stage           = "mido"
+  stage           = "ステージ名"
   vpc_cidr_block  = "10.53.0.0/16"  // 追加
   env = {  // 追加
     "APP_NAME" : local.app_name,
     "STAGE" : local.stage,
   }
+}
+
+// 出力
+output "alb_host_name" {
+  value = module.alb.app_alb.dns_name
+}
+output "task_definition" {  // 追加
+  value = "${module.app.ecs_task_family}:${module.app.ecs_task_revision}"
 }
 
 // ... 略 ...
