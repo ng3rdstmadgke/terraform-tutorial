@@ -5,14 +5,14 @@
 resource "aws_iam_role" "codebuild_service_role" {
   name = "${var.app_name}-${var.stage}-CodeBuildServiceRole"
   assume_role_policy = jsonencode({
-    "Version": "2012-10-17",
-    "Statement": [
+    "Version" : "2012-10-17",
+    "Statement" : [
       {
-        "Effect": "Allow",
-        "Principal": {
-          "Service": "codebuild.amazonaws.com"
+        "Effect" : "Allow",
+        "Principal" : {
+          "Service" : "codebuild.amazonaws.com"
         },
-        "Action": "sts:AssumeRole"
+        "Action" : "sts:AssumeRole"
       }
     ]
   })
@@ -27,82 +27,82 @@ resource "aws_iam_role" "codebuild_service_role" {
 resource "aws_iam_policy" "codebuild_service_policy" {
   name = "${var.app_name}-${var.stage}-CodeBuildServicePolicy"
   policy = jsonencode({
-    "Version": "2012-10-17",
-    "Statement": [
-    {
-      "Sid": "CloudWatchLogsPolicy",
-      "Effect": "Allow",
-      "Action": [
-        "logs:CreateLogGroup",
-        "logs:CreateLogStream",
-        "logs:PutLogEvents"
-      ],
-      "Resource": [
-        "*"
-      ]
-    },
-    {
-      "Sid": "CodeCommitPolicy",
-      "Effect": "Allow",
-      "Action": [
-        "codecommit:GitPull"
-      ],
-      "Resource": [
-        "*"
-      ]
-    },
-    {
-      "Sid": "S3GetObjectPolicy",
-      "Effect": "Allow",
-      "Action": [
-        "s3:GetObject",
-        "s3:GetObjectVersion"
-      ],
-      "Resource": [
-        "*"
-      ]
-    },
-    {
-      "Sid": "S3PutObjectPolicy",
-      "Effect": "Allow",
-      "Action": [
-        "s3:PutObject"
-      ],
-      "Resource": [
-        "*"
-      ]
-    },
-    {
-      "Sid": "ECRPullPolicy",
-      "Effect": "Allow",
-      "Action": [
-        "ecr:BatchCheckLayerAvailability",
-        "ecr:GetDownloadUrlForLayer",
-        "ecr:BatchGetImage"
-      ],
-      "Resource": [
-        "*"
-      ]
-    },
-    {
-      "Sid": "ECRAuthPolicy",
-      "Effect": "Allow",
-      "Action": [
-        "ecr:GetAuthorizationToken"
-      ],
-      "Resource": [
-        "*"
-      ]
-    },
-    {
-      "Sid": "S3BucketIdentity",
-      "Effect": "Allow",
-      "Action": [
-        "s3:GetBucketAcl",
-        "s3:GetBucketLocation"
-      ],
-      "Resource": "*"
-    }
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Sid" : "CloudWatchLogsPolicy",
+        "Effect" : "Allow",
+        "Action" : [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ],
+        "Resource" : [
+          "*"
+        ]
+      },
+      {
+        "Sid" : "CodeCommitPolicy",
+        "Effect" : "Allow",
+        "Action" : [
+          "codecommit:GitPull"
+        ],
+        "Resource" : [
+          "*"
+        ]
+      },
+      {
+        "Sid" : "S3GetObjectPolicy",
+        "Effect" : "Allow",
+        "Action" : [
+          "s3:GetObject",
+          "s3:GetObjectVersion"
+        ],
+        "Resource" : [
+          "*"
+        ]
+      },
+      {
+        "Sid" : "S3PutObjectPolicy",
+        "Effect" : "Allow",
+        "Action" : [
+          "s3:PutObject"
+        ],
+        "Resource" : [
+          "*"
+        ]
+      },
+      {
+        "Sid" : "ECRPullPolicy",
+        "Effect" : "Allow",
+        "Action" : [
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:BatchGetImage"
+        ],
+        "Resource" : [
+          "*"
+        ]
+      },
+      {
+        "Sid" : "ECRAuthPolicy",
+        "Effect" : "Allow",
+        "Action" : [
+          "ecr:GetAuthorizationToken"
+        ],
+        "Resource" : [
+          "*"
+        ]
+      },
+      {
+        "Sid" : "S3BucketIdentity",
+        "Effect" : "Allow",
+        "Action" : [
+          "s3:GetBucketAcl",
+          "s3:GetBucketLocation"
+        ],
+        "Resource" : "*"
+      }
     ]
   })
 }
@@ -117,11 +117,11 @@ resource "aws_iam_role_policy_attachment" "attach_codebuild_service_policy" {
 resource "aws_iam_policy" "codebuild_for_vpc_policy" {
   name = "${var.app_name}-${var.stage}-CodeBuildForVpcPolicy"
   policy = jsonencode({
-    "Version": "2012-10-17",
-    "Statement": [
+    "Version" : "2012-10-17",
+    "Statement" : [
       {
-        "Effect": "Allow",
-        "Action": [
+        "Effect" : "Allow",
+        "Action" : [
           "ec2:CreateNetworkInterface",
           "ec2:DescribeDhcpOptions",
           "ec2:DescribeNetworkInterfaces",
@@ -130,20 +130,20 @@ resource "aws_iam_policy" "codebuild_for_vpc_policy" {
           "ec2:DescribeSecurityGroups",
           "ec2:DescribeVpcs"
         ],
-        "Resource": "*"
+        "Resource" : "*"
       },
       {
-        "Effect": "Allow",
-        "Action": [
+        "Effect" : "Allow",
+        "Action" : [
           "ec2:CreateNetworkInterfacePermission"
         ],
-        "Resource": "arn:aws:ec2:${var.aws_region}:${var.account_id}:network-interface/*",
-        "Condition": {
-          "StringEquals": {
-            "ec2:AuthorizedService": "codebuild.amazonaws.com"
+        "Resource" : "arn:aws:ec2:${var.aws_region}:${var.account_id}:network-interface/*",
+        "Condition" : {
+          "StringEquals" : {
+            "ec2:AuthorizedService" : "codebuild.amazonaws.com"
           },
-          "ArnEquals": {
-            "ec2:Subnet": [
+          "ArnEquals" : {
+            "ec2:Subnet" : [
               for subnet in var.subnets : "arn:aws:ec2:${var.aws_region}:${var.account_id}:subnet/${subnet}"
             ]
           }
@@ -163,30 +163,30 @@ resource "aws_iam_role_policy_attachment" "attach_codebuild_for_vpc_policy" {
 resource "aws_iam_policy" "codebuild_for_ssm_policy" {
   name = "${var.app_name}-${var.stage}-CodeBuildForSsmPolicy"
   policy = jsonencode({
-    "Version": "2012-10-17",
-    "Statement": [
+    "Version" : "2012-10-17",
+    "Statement" : [
       {
-        "Effect": "Allow",
-        "Action": [
+        "Effect" : "Allow",
+        "Action" : [
           "ssmmessages:CreateControlChannel",
           "ssmmessages:CreateDataChannel",
           "ssmmessages:OpenControlChannel",
           "ssmmessages:OpenDataChannel"
         ],
-        "Resource": "*"
+        "Resource" : "*"
       },
       {
-        "Effect": "Allow",
-        "Action": "logs:DescribeLogGroups",
-        "Resource": "arn:aws:logs:${var.aws_region}:${var.account_id}:log-group:*:*"
+        "Effect" : "Allow",
+        "Action" : "logs:DescribeLogGroups",
+        "Resource" : "arn:aws:logs:${var.aws_region}:${var.account_id}:log-group:*:*"
       },
       {
-        "Effect": "Allow",
-        "Action": [
+        "Effect" : "Allow",
+        "Action" : [
           "logs:CreateLogStream",
           "logs:PutLogEvents"
         ],
-        "Resource": "arn:aws:logs:${var.aws_region}:${var.account_id}:log-group:${aws_cloudwatch_log_group.codebuild.name}:*"
+        "Resource" : "arn:aws:logs:${var.aws_region}:${var.account_id}:log-group:${aws_cloudwatch_log_group.codebuild.name}:*"
       }
     ]
   })
@@ -202,26 +202,26 @@ resource "aws_iam_role_policy_attachment" "attach_codebuild_for_ssm_policy" {
 resource "aws_iam_policy" "codebuild_for_app_policy" {
   name = "${var.app_name}-${var.stage}-CodeBuildForAppPolicy"
   policy = jsonencode({
-    "Version": "2012-10-17",
-    "Statement": [
+    "Version" : "2012-10-17",
+    "Statement" : [
       {
-        "Effect": "Allow",
-        "Action": [
+        "Effect" : "Allow",
+        "Action" : [
           "ecr:CompleteLayerUpload",
           "ecr:InitiateLayerUpload",
           "ecr:PutImage",
           "ecr:UploadLayerPart"
         ],
-        "Resource": [
+        "Resource" : [
           "*"
         ]
       },
       {
-        "Effect": "Allow",
-        "Action": [
+        "Effect" : "Allow",
+        "Action" : [
           "ecs:Describe*"
         ],
-        "Resource": [
+        "Resource" : [
           "*"
         ]
       }
@@ -240,14 +240,14 @@ resource "aws_iam_role_policy_attachment" "attach_codebuild_for_app_policy" {
 resource "aws_iam_role" "codedeploy_service_role" {
   name = "${var.app_name}-${var.stage}-CodeDeployServiceRole"
   assume_role_policy = jsonencode({
-    "Version": "2012-10-17",
-    "Statement": [
+    "Version" : "2012-10-17",
+    "Statement" : [
       {
-        "Effect": "Allow",
-        "Principal": {
-          "Service": "codedeploy.amazonaws.com"
+        "Effect" : "Allow",
+        "Principal" : {
+          "Service" : "codedeploy.amazonaws.com"
         },
-        "Action": "sts:AssumeRole"
+        "Action" : "sts:AssumeRole"
       }
     ]
   })
@@ -269,14 +269,14 @@ resource "aws_iam_role_policy_attachment" "attach_codedeploy_service_role_policy
 resource "aws_iam_role" "codepipeline_service_role" {
   name = "${var.app_name}-${var.stage}-CodePipelineServiceRole"
   assume_role_policy = jsonencode({
-    "Version": "2012-10-17",
-    "Statement": [
+    "Version" : "2012-10-17",
+    "Statement" : [
       {
-        "Effect": "Allow",
-        "Principal": {
-          "Service": "codepipeline.amazonaws.com",
+        "Effect" : "Allow",
+        "Principal" : {
+          "Service" : "codepipeline.amazonaws.com",
         },
-        "Action": "sts:AssumeRole",
+        "Action" : "sts:AssumeRole",
       }
     ]
   })
@@ -289,17 +289,17 @@ resource "aws_iam_role" "codepipeline_service_role" {
 resource "aws_iam_policy" "codepipeline_service_policy" {
   name = "${var.app_name}-${var.stage}-CodePipelineServicePolicy"
   policy = jsonencode({
-    "Version": "2012-10-17",
-    "Statement": [
+    "Version" : "2012-10-17",
+    "Statement" : [
       {
-        "Action": [
+        "Action" : [
           "iam:PassRole"
         ],
-        "Resource": "*",
-        "Effect": "Allow",
-        "Condition": {
-          "StringEqualsIfExists": {
-            "iam:PassedToService": [
+        "Resource" : "*",
+        "Effect" : "Allow",
+        "Condition" : {
+          "StringEqualsIfExists" : {
+            "iam:PassedToService" : [
               "cloudformation.amazonaws.com",
               "elasticbeanstalk.amazonaws.com",
               "ec2.amazonaws.com",
@@ -309,18 +309,18 @@ resource "aws_iam_policy" "codepipeline_service_policy" {
         }
       },
       {
-        "Action": [
+        "Action" : [
           "codecommit:CancelUploadArchive",
           "codecommit:GetBranch",
           "codecommit:GetCommit",
           "codecommit:GetUploadArchiveStatus",
           "codecommit:UploadArchive"
         ],
-        "Resource": "*",
-        "Effect": "Allow"
+        "Resource" : "*",
+        "Effect" : "Allow"
       },
       {
-        "Action": [
+        "Action" : [
           "codedeploy:CreateDeployment",
           "codedeploy:GetApplication",
           "codedeploy:GetApplicationRevision",
@@ -328,11 +328,11 @@ resource "aws_iam_policy" "codepipeline_service_policy" {
           "codedeploy:GetDeploymentConfig",
           "codedeploy:RegisterApplicationRevision"
         ],
-        "Resource": "*",
-        "Effect": "Allow"
+        "Resource" : "*",
+        "Effect" : "Allow"
       },
       {
-        "Action": [
+        "Action" : [
           "elasticbeanstalk:*",
           "ec2:*",
           "elasticloadbalancing:*",
@@ -345,19 +345,19 @@ resource "aws_iam_policy" "codepipeline_service_policy" {
           "sqs:*",
           "ecs:*"
         ],
-        "Resource": "*",
-        "Effect": "Allow"
+        "Resource" : "*",
+        "Effect" : "Allow"
       },
       {
-        "Action": [
+        "Action" : [
           "lambda:InvokeFunction",
           "lambda:ListFunctions"
         ],
-        "Resource": "*",
-        "Effect": "Allow"
+        "Resource" : "*",
+        "Effect" : "Allow"
       },
       {
-        "Action": [
+        "Action" : [
           "opsworks:CreateDeployment",
           "opsworks:DescribeApps",
           "opsworks:DescribeCommands",
@@ -367,11 +367,11 @@ resource "aws_iam_policy" "codepipeline_service_policy" {
           "opsworks:UpdateApp",
           "opsworks:UpdateStack"
         ],
-        "Resource": "*",
-        "Effect": "Allow"
+        "Resource" : "*",
+        "Effect" : "Allow"
       },
       {
-        "Action": [
+        "Action" : [
           "cloudformation:CreateStack",
           "cloudformation:DeleteStack",
           "cloudformation:DescribeStacks",
@@ -383,20 +383,20 @@ resource "aws_iam_policy" "codepipeline_service_policy" {
           "cloudformation:SetStackPolicy",
           "cloudformation:ValidateTemplate"
         ],
-        "Resource": "*",
-        "Effect": "Allow"
+        "Resource" : "*",
+        "Effect" : "Allow"
       },
       {
-        "Action": [
+        "Action" : [
           "codebuild:BatchGetBuilds",
           "codebuild:StartBuild"
         ],
-        "Resource": "*",
-        "Effect": "Allow"
+        "Resource" : "*",
+        "Effect" : "Allow"
       },
       {
-        "Effect": "Allow",
-        "Action": [
+        "Effect" : "Allow",
+        "Action" : [
           "devicefarm:ListProjects",
           "devicefarm:ListDevicePools",
           "devicefarm:GetRun",
@@ -404,32 +404,32 @@ resource "aws_iam_policy" "codepipeline_service_policy" {
           "devicefarm:CreateUpload",
           "devicefarm:ScheduleRun"
         ],
-        "Resource": "*"
+        "Resource" : "*"
       },
       {
-        "Effect": "Allow",
-        "Action": [
+        "Effect" : "Allow",
+        "Action" : [
           "servicecatalog:ListProvisioningArtifacts",
           "servicecatalog:CreateProvisioningArtifact",
           "servicecatalog:DescribeProvisioningArtifact",
           "servicecatalog:DeleteProvisioningArtifact",
           "servicecatalog:UpdateProduct"
         ],
-        "Resource": "*"
+        "Resource" : "*"
       },
       {
-        "Effect": "Allow",
-        "Action": [
+        "Effect" : "Allow",
+        "Action" : [
           "cloudformation:ValidateTemplate"
         ],
-        "Resource": "*"
+        "Resource" : "*"
       },
       {
-        "Effect": "Allow",
-        "Action": [
+        "Effect" : "Allow",
+        "Action" : [
           "ecr:DescribeImages"
         ],
-        "Resource": "*"
+        "Resource" : "*"
       }
     ]
   })
@@ -444,16 +444,16 @@ resource "aws_iam_role_policy_attachment" "attach_codepipeline_service_policy" {
  * CodePipelineのトリガーとして利用するEventBridgeのサービスロール
  */
 resource "aws_iam_role" "event_bridge_codepipeline" {
-  name               = "${var.app_name}-${var.stage}-EventBridgeCodepipelineTrigerRole"
+  name = "${var.app_name}-${var.stage}-EventBridgeCodepipelineTrigerRole"
   assume_role_policy = jsonencode({
-    "Version": "2012-10-17",
-    "Statement": [
+    "Version" : "2012-10-17",
+    "Statement" : [
       {
-        "Effect": "Allow",
-        "Principal": {
-          "Service": "events.amazonaws.com",
+        "Effect" : "Allow",
+        "Principal" : {
+          "Service" : "events.amazonaws.com",
         },
-        "Action": "sts:AssumeRole",
+        "Action" : "sts:AssumeRole",
       }
     ]
   })
@@ -461,16 +461,16 @@ resource "aws_iam_role" "event_bridge_codepipeline" {
 resource "aws_iam_policy" "event_bridge_codepipeline_policy" {
   name = "${var.app_name}-${var.stage}-EventBridgeCodepipelineTrigerPolicy"
   policy = jsonencode({
-    "Version": "2012-10-17",
-    "Statement": [
+    "Version" : "2012-10-17",
+    "Statement" : [
       {
-        "Action": [
+        "Action" : [
           "codepipeline:StartPipelineExecution"
         ],
-        "Resource": [
+        "Resource" : [
           "${aws_codepipeline.this.arn}"
         ],
-        "Effect": "Allow"
+        "Effect" : "Allow"
       }
     ]
 

@@ -3,22 +3,22 @@ variable "stage" {}
 variable "account_id" {}
 variable "app_image_uri" {}
 variable "vpc_id" {}
-variable "subnets" { type=list(string) }
+variable "subnets" { type = list(string) }
 variable "ingress_cidr_blocks" {
   type = list(string)
 }
 variable "app_alb_arn" {}
-variable "env" {type=map}
+variable "env" { type = map(any) }
 
 variable "certificate_arn" {
-  type = string
-  default = ""
+  type        = string
+  default     = ""
   description = "SSL証明書のARN。空文字の場合はHTTPのリスナーを作成する"
 }
 
 locals {
-  use_https_listener = length(var.certificate_arn) > 0  ? "1" : "0"
+  use_https_listener = length(var.certificate_arn) > 0 ? "1" : "0"
   use_http_listener  = length(var.certificate_arn) <= 0 ? "1" : "0"
-  container_name = "app"
-  container_port = 80
+  container_name     = "app"
+  container_port     = 80
 }

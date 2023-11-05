@@ -3,7 +3,7 @@ variable "stage" {}
 variable "aws_region" {}
 variable "account_id" {}
 variable "vpc_id" {}
-variable "subnets" { type=list(string) }
+variable "subnets" { type = list(string) }
 variable "app_image_uri" {}
 variable "ecs_cluster_name" {}
 variable "ecs_service_name" {}

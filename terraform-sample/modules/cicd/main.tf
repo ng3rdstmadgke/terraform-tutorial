@@ -9,7 +9,7 @@
  */
 # CodeBuild用セキュリティグループ
 resource "aws_security_group" "codebuild_sg" {
-  name = "${var.app_name}-${var.stage}-app-CodeBuild-sg"
+  name   = "${var.app_name}-${var.stage}-app-CodeBuild-sg"
   vpc_id = var.vpc_id
   egress {
     from_port   = 0
@@ -19,13 +19,13 @@ resource "aws_security_group" "codebuild_sg" {
   }
 
   tags = {
-     Name = "${var.app_name}-${var.stage}-app-CodeBuild-sg"
+    Name = "${var.app_name}-${var.stage}-app-CodeBuild-sg"
   }
 }
 
- # ロググループ
+# ロググループ
 resource "aws_cloudwatch_log_group" "codebuild" {
-  name = "${var.app_name}/${var.stage}/app/codebuild"
+  name              = "${var.app_name}/${var.stage}/app/codebuild"
   retention_in_days = 365
 }
 
@@ -53,14 +53,14 @@ resource "aws_codebuild_project" "this" {
     # BUILD_GENERAL1_SMALL : 3GB memory  2 vCPUs
     # BUILD_GENERAL1_MEDIUM: 7GB memory  4 vCPUs
     # BUILD_GENERAL1_LARGE : 15GB memory 8 vCPUs
-    compute_type                = "BUILD_GENERAL1_MEDIUM"
+    compute_type = "BUILD_GENERAL1_MEDIUM"
     # CodeBuildに用意されているDockerイメージ
     #   https://docs.aws.amazon.com/ja_jp/codebuild/latest/userguide/build-env-ref-available.html
     image                       = "aws/codebuild/amazonlinux2-x86_64-standard:5.0"
     type                        = "LINUX_CONTAINER"
     image_pull_credentials_type = "CODEBUILD"
     # 特権モードでコンテナを起動
-    privileged_mode             = true
+    privileged_mode = true
 
     environment_variable {
       name  = "AWS_ACCOUNT_ID"
@@ -85,9 +85,9 @@ resource "aws_codebuild_project" "this" {
   }
 
   vpc_config {
-    vpc_id = var.vpc_id
-    subnets = var.subnets
-    security_group_ids = [ aws_security_group.codebuild_sg.id ]
+    vpc_id             = var.vpc_id
+    subnets            = var.subnets
+    security_group_ids = [aws_security_group.codebuild_sg.id]
   }
 
   logs_config {
@@ -118,7 +118,7 @@ resource "aws_codedeploy_app" "this" {
 
 # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/codedeploy_deployment_group
 resource "aws_codedeploy_deployment_group" "this" {
-  app_name               = aws_codedeploy_app.this.name
+  app_name = aws_codedeploy_app.this.name
   # トラトラフィックの切り替え方式
   # https://docs.aws.amazon.com/ja_jp/AmazonECS/latest/developerguide/deployment-type-bluegreen.html
   # - CodeDeployDefault.ECSAllAtOnce                    : すべてのトラフィックを切り替え
@@ -140,12 +140,12 @@ resource "aws_codedeploy_deployment_group" "this" {
     target_group_pair_info {
       # 本番用のリスナー (HTTPS:443)
       prod_traffic_route {
-        listener_arns = [ var.lb_listener_green_arn ]
+        listener_arns = [var.lb_listener_green_arn]
       }
 
       # テスト用のリスナー (HTTP:8080)
       test_traffic_route {
-        listener_arns = [ var.lb_listener_blue_arn ]
+        listener_arns = [var.lb_listener_blue_arn]
       }
 
       # ターゲットグループ1
@@ -158,9 +158,9 @@ resource "aws_codedeploy_deployment_group" "this" {
   # デプロイ方式
   deployment_style {
     # WITH_TRAFFIC_CONTROL or WITHOUT_TRAFFIC_CONTROL
-    deployment_option = "WITH_TRAFFIC_CONTROL"  # LBを利用したトラフィックの切り替えを行う
+    deployment_option = "WITH_TRAFFIC_CONTROL" # LBを利用したトラフィックの切り替えを行う
     # IN_PLACE or BLUE_GREEN
-    deployment_type   = "BLUE_GREEN"  # Blue/Greenデプロイを行う
+    deployment_type = "BLUE_GREEN" # Blue/Greenデプロイを行う
   }
 
   blue_green_deployment_config {
@@ -186,7 +186,7 @@ resource "aws_codedeploy_deployment_group" "this" {
   auto_rollback_configuration {
     enabled = true
     # デプロイに失敗したとき
-    events  = ["DEPLOYMENT_FAILURE"]
+    events = ["DEPLOYMENT_FAILURE"]
   }
 
 }
@@ -196,13 +196,13 @@ resource "aws_cloudwatch_event_rule" "codepipeline_trigger" {
   name = "${var.app_name}-${var.stage}-codepipeline-trigger"
 
   event_pattern = jsonencode({
-    "source": ["aws.codecommit"],
-    "detail-type": ["CodeCommit Repository State Change"],
-    "resources": ["arn:aws:codecommit:${var.aws_region}:${var.account_id}:${var.repository_name}"],
-    "detail": {
-      "event": ["referenceCreated", "referenceUpdated"],
-      "referenceType": ["branch"],
-      "referenceName": ["${var.stage}"]
+    "source" : ["aws.codecommit"],
+    "detail-type" : ["CodeCommit Repository State Change"],
+    "resources" : ["arn:aws:codecommit:${var.aws_region}:${var.account_id}:${var.repository_name}"],
+    "detail" : {
+      "event" : ["referenceCreated", "referenceUpdated"],
+      "referenceType" : ["branch"],
+      "referenceName" : ["${var.stage}"]
     }
   })
 }
@@ -235,8 +235,8 @@ resource "aws_codepipeline" "this" {
     # CodeCommit アクションリファレンス:
     # https://docs.aws.amazon.com/ja_jp/codepipeline/latest/userguide/action-reference-CodeCommit.html
     action {
-      run_order        = 1
-      name             = "Source"
+      run_order = 1
+      name      = "Source"
       # アクションカテゴリにはSource, Build, Test, Deploy, Approval, Invokeのいずれかを指定する
       # Source: CodeCommit, S3, ECR, etc...
       # Build: CodeBuild, Jenkins, etc...
@@ -244,14 +244,14 @@ resource "aws_codepipeline" "this" {
       category         = "Source"
       owner            = "AWS"
       provider         = "CodeCommit"
-      version          = "1"  # 書き方のバージョン (1で固定)
+      version          = "1" # 書き方のバージョン (1で固定)
       output_artifacts = ["SourceArtifact"]
 
       configuration = {
         # ソースの変更が検出されるリポジトリ
-        RepositoryName       = var.repository_name
+        RepositoryName = var.repository_name
         # ソースの変更が検出されるブランチ名
-        BranchName           = var.stage
+        BranchName = var.stage
         # ソースの変更はEventBridgeで検出するので、CodePipelineによるポーリングは不要
         PollForSourceChanges = "false"
       }
@@ -268,7 +268,7 @@ resource "aws_codepipeline" "this" {
       category         = "Build"
       owner            = "AWS"
       provider         = "CodeBuild"
-      version          = "1"  # 書き方のバージョン (1で固定)
+      version          = "1" # 書き方のバージョン (1で固定)
       input_artifacts  = ["SourceArtifact"]
       output_artifacts = ["BuildArtifact"]
 
@@ -300,18 +300,18 @@ resource "aws_codepipeline" "this" {
 
       configuration = {
         # CodeDeployアプリケーション
-        ApplicationName                = aws_codedeploy_app.this.name
+        ApplicationName = aws_codedeploy_app.this.name
         # ECSサービスに設定されているデプロイグループ
-        DeploymentGroupName            = aws_codedeploy_deployment_group.this.app_name
+        DeploymentGroupName = aws_codedeploy_deployment_group.this.app_name
         # タスク定義ファイル(taskdef.json)を提供する入力アーティファクトの名前 (ソースアクションの出力アーティファクト名)
         TaskDefinitionTemplateArtifact = "BuildArtifact"
         # AppSpecファイル(appspec.yaml)を提供する入力アーティファクトの名前 (ソースアクションの出力アーティファクト名)
-        AppSpecTemplateArtifact        = "BuildArtifact"
+        AppSpecTemplateArtifact = "BuildArtifact"
         # イメージ定義ファイル(imageDetail.json)を提供する入力アーティファクトの名前 (ソースアクションの出力アーティファクト名)
-        Image1ArtifactName             = "BuildArtifact"
+        Image1ArtifactName = "BuildArtifact"
         # taskdef.json内で利用できるプレースホルダを定義。
         # taskdef.json内でこのプレースホルダを利用すると、imageDetail.jsonのImageURIに置換される。
-        Image1ContainerName            = "IMAGE1_NAME"
+        Image1ContainerName = "IMAGE1_NAME"
       }
     }
   }

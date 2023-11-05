@@ -29,7 +29,7 @@ output "tg_2" {
 
 output "listener_green" {
   # countを利用したリソースはlistになるので、インデックスを指定する
-  value = length(var.certificate_arn) > 0  ? aws_lb_listener.app_listener_green_https.0 : aws_lb_listener.app_listener_green_http.0
+  value = length(var.certificate_arn) > 0 ? aws_lb_listener.app_listener_green_https.0 : aws_lb_listener.app_listener_green_http.0
 }
 
 output "listener_blue" {

@@ -11,46 +11,46 @@ resource "aws_rds_cluster_parameter_group" "aurora_serverless_mysql80" {
     apply_method = "immediate"
   }
   parameter {
-    name = "character_set_client"
+    name  = "character_set_client"
     value = "utf8mb4"
   }
   parameter {
-    name = "character_set_connection"
+    name  = "character_set_connection"
     value = "utf8mb4"
   }
   parameter {
-    name = "character_set_database"
+    name  = "character_set_database"
     value = "utf8mb4"
   }
   parameter {
-    name = "character_set_filesystem"
+    name  = "character_set_filesystem"
     value = "binary"
   }
   parameter {
-    name = "character_set_results"
+    name  = "character_set_results"
     value = "utf8mb4"
   }
   parameter {
-    name = "character_set_server"
+    name  = "character_set_server"
     value = "utf8mb4"
   }
   parameter {
-    name = "collation_connection"
+    name  = "collation_connection"
     value = "utf8mb4_bin"
   }
   parameter {
-    name = "collation_server"
+    name  = "collation_server"
     value = "utf8mb4_bin"
   }
 }
 
 resource "aws_db_subnet_group" "aurora_serverless_mysql80" {
-    name        = "${var.app_name}-${var.stage}-aurora-serverless-v2-mysql80-sg"
-    subnet_ids  = var.subnets
+  name       = "${var.app_name}-${var.stage}-aurora-serverless-v2-mysql80-sg"
+  subnet_ids = var.subnets
 }
 
 resource "aws_security_group" "aurora_serverless_mysql80" {
-  name = "${var.app_name}-${var.stage}-aurora-serverless-v2-mysql80"
+  name   = "${var.app_name}-${var.stage}-aurora-serverless-v2-mysql80"
   vpc_id = var.vpc_id
   egress {
     from_port   = 0
@@ -59,9 +59,9 @@ resource "aws_security_group" "aurora_serverless_mysql80" {
     cidr_blocks = ["0.0.0.0/0"]
   }
   ingress {
-    from_port = local.db_port
-    to_port = local.db_port
-    protocol = "tcp"
+    from_port   = local.db_port
+    to_port     = local.db_port
+    protocol    = "tcp"
     cidr_blocks = var.ingress_cidr_blocks
   }
   tags = {
@@ -74,7 +74,7 @@ resource "aws_security_group" "aurora_serverless_mysql80" {
 resource "aws_rds_cluster" "aurora_serverless_mysql80" {
   cluster_identifier = "${var.app_name}-${var.stage}-aurora-serverless-v2-mysql80-cluster"
 
-  engine         = "aurora-mysql"
+  engine = "aurora-mysql"
   // 利用可能なバージョンの一覧
   /*
     aws rds describe-orderable-db-instance-options \
@@ -96,13 +96,13 @@ resource "aws_rds_cluster" "aurora_serverless_mysql80" {
   backup_retention_period = 7
 
   // aws_rds_cluster_instance.db_subnet_group_nameと一致している必要がある
-  db_subnet_group_name = aws_db_subnet_group.aurora_serverless_mysql80.name
+  db_subnet_group_name   = aws_db_subnet_group.aurora_serverless_mysql80.name
   vpc_security_group_ids = [aws_security_group.aurora_serverless_mysql80.id]
 
   // スケールアップ/ダウン時の最小ACU, 最大ACUを定義
   serverlessv2_scaling_configuration {
-    min_capacity = 0.5  // 0.5 ~
-    max_capacity = 1.0  // ~ 128
+    min_capacity = 0.5 // 0.5 ~
+    max_capacity = 1.0 // ~ 128
   }
 
   // 削除時にスナップショットを作成しな時
@@ -128,12 +128,12 @@ resource "aws_rds_cluster_instance" "aurora_serverless_mysql80" {
   // 例)
   //   3 なら wrインスタンス = 1, roインスタンス = 2
   //   5 なら wrインスタンス = 1, roインスタンス = 4
-  count = var.instance_num
+  count              = var.instance_num
   cluster_identifier = aws_rds_cluster.aurora_serverless_mysql80.id
   // Aurora Serverless V2を利用する場合は db.serverless 固定
-  instance_class     = "db.serverless"
-  engine             = aws_rds_cluster.aurora_serverless_mysql80.engine
-  engine_version     = aws_rds_cluster.aurora_serverless_mysql80.engine_version
+  instance_class = "db.serverless"
+  engine         = aws_rds_cluster.aurora_serverless_mysql80.engine
+  engine_version = aws_rds_cluster.aurora_serverless_mysql80.engine_version
 
   // インスタンスで上書き
   db_parameter_group_name = aws_db_parameter_group.aurora_serverless_mysql80.name
@@ -153,18 +153,18 @@ resource "aws_db_parameter_group" "aurora_serverless_mysql80" {
 # DBのログイン情報を保持する SecretsManager
 #
 resource "aws_secretsmanager_secret" "aurora_serverless_mysql80" {
-  name = "/${var.app_name}/${var.stage}/db"
-  recovery_window_in_days = 0
+  name                           = "/${var.app_name}/${var.stage}/db"
+  recovery_window_in_days        = 0
   force_overwrite_replica_secret = true
 }
 
 resource "aws_secretsmanager_secret_version" "aurora_serverless_mysql80" {
   secret_id = aws_secretsmanager_secret.aurora_serverless_mysql80.id
   secret_string = jsonencode({
-    db_user = var.db_user
+    db_user     = var.db_user
     db_password = var.db_password
-    db_host = aws_rds_cluster.aurora_serverless_mysql80.endpoint
-    db_port = aws_rds_cluster.aurora_serverless_mysql80.port
+    db_host     = aws_rds_cluster.aurora_serverless_mysql80.endpoint
+    db_port     = aws_rds_cluster.aurora_serverless_mysql80.port
   })
 }
 

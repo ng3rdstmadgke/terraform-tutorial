@@ -2,7 +2,7 @@ variable "app_name" {}
 variable "stage" {}
 variable "vpc_id" {}
 variable "subnets" {
-  type = list
+  type = list(any)
 }
 variable "db_name" {}
 variable "db_user" {}

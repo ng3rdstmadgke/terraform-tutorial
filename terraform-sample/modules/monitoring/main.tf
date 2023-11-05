@@ -1,17 +1,17 @@
 # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/appautoscaling_target#ecs-service-autoscaling
 resource "aws_appautoscaling_target" "ecs_appautoscaling_target" {
   # オートスケーリング対象のサービス名を指定
-  service_namespace  = "ecs"
+  service_namespace = "ecs"
   # "service/クラスター名/サービス名" 形式で紐付けたいECSのサービスを指定します。
-  resource_id        = "service/${var.ecs_cluster_name}/${var.ecs_service_name}"
+  resource_id = "service/${var.ecs_cluster_name}/${var.ecs_service_name}"
   # オートスケーリングを実行する対象を指定します。
   # https://docs.aws.amazon.com/autoscaling/application/APIReference/API_RegisterScalableTarget.html#autoscaling-RegisterScalableTarget-request-ScalableDimension
   scalable_dimension = "ecs:service:DesiredCount"
   role_arn           = aws_iam_role.ecs_autoscaling_role.arn
   # オートスケーリングさせる時の最小値と最大値です。
   # サーバー台数が無限に増え続けないように事前に上限の設定を行います。
-  min_capacity       = 1
-  max_capacity       = var.max_capacity
+  min_capacity = 1
+  max_capacity = var.max_capacity
 
   depends_on = [
     aws_iam_policy.ecs_autoscaling_policy
@@ -46,7 +46,7 @@ resource "aws_appautoscaling_policy" "ecs_1_policy" {
       #   FROM SCHEMA("AWS/ApplicationELB", TargetGroup)
       #   WHERE TargetGroup = 'targetgroup/xxxxxxxxxxx-app-tg-2/xxxxxxxxxxxxxxxx'
       metrics {
-        id = "${var.app_name}_${var.stage}_m1"
+        id    = "${var.app_name}_${var.stage}_m1"
         label = "${var.app_name}-${var.stage}-app-tg-1 RequestCountPerTarget"
 
         metric_stat {
@@ -75,7 +75,7 @@ resource "aws_appautoscaling_policy" "ecs_1_policy" {
       #   FROM SCHEMA("AWS/ApplicationELB", TargetGroup)
       #   WHERE TargetGroup = 'targetgroup/xxxxxxxxxxx-app-tg-2/xxxxxxxxxxxxxxxx'
       metrics {
-        id = "${var.app_name}_${var.stage}_m2"
+        id    = "${var.app_name}_${var.stage}_m2"
         label = "${var.app_name}-${var.stage}-app-tg-2 RequestCountPerTarget"
 
         metric_stat {
@@ -96,9 +96,9 @@ resource "aws_appautoscaling_policy" "ecs_1_policy" {
 
       # ターゲットグループ1と2の リクエスト数/ターゲット台数 を合計
       metrics {
-        label       = "${var.app_name}-${var.stage}-app-lb RequestCountPerTarget"
-        id = "${var.app_name}_${var.stage}_m3"
-        expression  = "${var.app_name}_${var.stage}_m1 + ${var.app_name}_${var.stage}_m2"
+        label      = "${var.app_name}-${var.stage}-app-lb RequestCountPerTarget"
+        id         = "${var.app_name}_${var.stage}_m3"
+        expression = "${var.app_name}_${var.stage}_m1 + ${var.app_name}_${var.stage}_m2"
         # trueのメトリクスがスケールイン/アウトの判断に使われる
         return_data = true
       }

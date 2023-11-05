@@ -58,7 +58,7 @@ resource "aws_lb_target_group" "app_tg_2" {
 resource "aws_lb_listener" "app_listener_green_https" {
   # use_https_listener = "1" のときのみ作成
   # Terraformでcountをifのように使う: https://qiita.com/mia_0032/items/978449a06699ed1abe15
-  count = local.use_https_listener
+  count             = local.use_https_listener
   load_balancer_arn = var.app_alb_arn
   port              = "443"
   protocol          = "HTTPS"
@@ -68,10 +68,10 @@ resource "aws_lb_listener" "app_listener_green_https" {
   default_action {
     type = "forward"
     forward {
-     target_group {
-       arn    = aws_lb_target_group.app_tg_1.arn
-       weight = 1
-     }
+      target_group {
+        arn    = aws_lb_target_group.app_tg_1.arn
+        weight = 1
+      }
     }
   }
   lifecycle {
@@ -85,7 +85,7 @@ resource "aws_lb_listener" "app_listener_green_https" {
 # HTTP:80 (HTTPS:443 にリダイレクト)
 resource "aws_lb_listener" "app_listener_redirect" {
   # use_https_listener = "1" のときのみ作成
-  count = local.use_https_listener
+  count             = local.use_https_listener
   load_balancer_arn = var.app_alb_arn
   port              = "80"
   protocol          = "HTTP"
@@ -111,7 +111,7 @@ resource "aws_lb_listener" "app_listener_redirect" {
  */
 resource "aws_lb_listener" "app_listener_green_http" {
   # use_http_listener = "1" のときのみ作成
-  count = local.use_http_listener
+  count             = local.use_http_listener
   load_balancer_arn = var.app_alb_arn
   port              = "80"
   protocol          = "HTTP"
@@ -119,10 +119,10 @@ resource "aws_lb_listener" "app_listener_green_http" {
   default_action {
     type = "forward"
     forward {
-     target_group {
-       arn    = aws_lb_target_group.app_tg_1.arn
-       weight = 1
-     }
+      target_group {
+        arn    = aws_lb_target_group.app_tg_1.arn
+        weight = 1
+      }
     }
   }
   lifecycle {
@@ -178,8 +178,8 @@ resource "aws_ecs_cluster_capacity_providers" "app_cluster_capacity_providers" {
   capacity_providers = ["FARGATE", "FARGATE_SPOT"]
 
   default_capacity_provider_strategy {
-    base              = 1  # 指定されたキャパシティプロバイダ上で実行するタスクの最小数
-    weight            = 1  # 指定されたキャパシティプロバイダを使用すべきタスク総数の割合
+    base              = 1 # 指定されたキャパシティプロバイダ上で実行するタスクの最小数
+    weight            = 1 # 指定されたキャパシティプロバイダを使用すべきタスク総数の割合
     capacity_provider = "FARGATE"
   }
 
@@ -193,7 +193,7 @@ resource "aws_ecs_cluster_capacity_providers" "app_cluster_capacity_providers" {
  * ロググループ
  */
 resource "aws_cloudwatch_log_group" "ecs_task_app_log_group" {
-  name = "${var.app_name}/${var.stage}/app/ecs-task"
+  name              = "${var.app_name}/${var.stage}/app/ecs-task"
   retention_in_days = 365
 }
 
@@ -212,14 +212,14 @@ resource "aws_ecs_task_definition" "app_task_definition" {
   #   タスクが利用する CPU および メモリの合計量。FARGATEの場合は必須。
   #   cpuとmemoryの値にはペアがあるので注意
   #   - https://docs.aws.amazon.com/ja_jp/AmazonECS/latest/developerguide/task_definition_parameters.html#task_size
-  cpu = 2048  # 2vCPU
-  memory = 4096  # 4GB
+  cpu    = 2048 # 2vCPU
+  memory = 4096 # 4GB
 
   # ネットワークモード:
   #   FARGATEではawsvpcのみ
   #   - https://docs.aws.amazon.com/ja_jp/AmazonECS/latest/developerguide/task_definition_parameters.html#network_mode
   #   - https://docs.aws.amazon.com/ja_jp/AmazonECS/latest/bestpracticesguide/networking-networkmode.html
-  network_mode             = "awsvpc"
+  network_mode = "awsvpc"
 
   # ランタイムプラットフォーム:
   #   コンテナのホストOSの情報
@@ -246,9 +246,9 @@ resource "aws_ecs_task_definition" "app_task_definition" {
     {
       name      = local.container_name
       image     = "${var.app_image_uri}:latest"
-      cpu       = 1024  # コンテナが利用するCPU (1vCPU)
-      memory    = 1024  # コンテナが利用するメモリ (1GB)
-      essential = true  # essential=Trueのコンテナが停止した場合、タスク全体が停止する
+      cpu       = 1024 # コンテナが利用するCPU (1vCPU)
+      memory    = 1024 # コンテナが利用するメモリ (1GB)
+      essential = true # essential=Trueのコンテナが停止した場合、タスク全体が停止する
       portMappings = [
         {
           containerPort = local.container_port
@@ -257,7 +257,7 @@ resource "aws_ecs_task_definition" "app_task_definition" {
       ]
       environment = [
         for k, v in var.env : {
-          name = k
+          name  = k
           value = v
         }
       ]
@@ -271,8 +271,8 @@ resource "aws_ecs_task_definition" "app_task_definition" {
       logConfiguration = {
         logDriver = "awslogs"
         options = {
-          awslogs-group = aws_cloudwatch_log_group.ecs_task_app_log_group.name
-          awslogs-region = "ap-northeast-1"
+          awslogs-group         = aws_cloudwatch_log_group.ecs_task_app_log_group.name
+          awslogs-region        = "ap-northeast-1"
           awslogs-stream-prefix = "app"
         }
       }
@@ -280,10 +280,10 @@ resource "aws_ecs_task_definition" "app_task_definition" {
       # dockerのヘルスチェック機能: https://docs.docker.jp/engine/reference/run.html#run-healthcheck
       # 書き方: https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/aws-properties-ecs-taskdefinition-healthcheck.html
       HealthCheck = {
-        command = ["CMD-SHELL", "curl -H 'User-Agent: Docker-HealthChecker' -f 'http://localhost/healthcheck' || exit 1"]
-        interval = 15
-        timeout = 5
-        retries = 3
+        command     = ["CMD-SHELL", "curl -H 'User-Agent: Docker-HealthChecker' -f 'http://localhost/healthcheck' || exit 1"]
+        interval    = 15
+        timeout     = 5
+        retries     = 3
         startPeriod = 30
       }
 
@@ -300,7 +300,7 @@ resource "aws_ecs_task_definition" "app_task_definition" {
  * ECSサービス用セキュリティグループ
  */
 resource "aws_security_group" "esc_service_sg" {
-  name = "${var.app_name}-${var.stage}-app-EcsService-sg"
+  name   = "${var.app_name}-${var.stage}-app-EcsService-sg"
   vpc_id = var.vpc_id
   egress {
     from_port   = 0
@@ -316,7 +316,7 @@ resource "aws_security_group" "esc_service_sg" {
   }
 
   tags = {
-     Name = "${var.app_name}-${var.stage}-app-EcsService-sg"
+    Name = "${var.app_name}-${var.stage}-app-EcsService-sg"
   }
 }
 
@@ -326,22 +326,22 @@ resource "aws_security_group" "esc_service_sg" {
 
 # aws_ecs_service: https://registry.terraform.io/providers/hashicorp/aws/latest/docs
 resource "aws_ecs_service" "app_service" {
-  name = "${var.app_name}-${var.stage}-app"
-  cluster         = aws_ecs_cluster.app_cluster.id
-  task_definition = aws_ecs_task_definition.app_task_definition.arn
-  desired_count   = 1
+  name             = "${var.app_name}-${var.stage}-app"
+  cluster          = aws_ecs_cluster.app_cluster.id
+  task_definition  = aws_ecs_task_definition.app_task_definition.arn
+  desired_count    = 1
   platform_version = "1.4.0"
-  launch_type = "FARGATE"
+  launch_type      = "FARGATE"
   # タスクが落ちた時のスケジューリング方式(FARGATEで指定できるのはREPLICAのみ)
   #   - https://docs.aws.amazon.com/ja_jp/AmazonECS/latest/developerguide/ecs_services.html#service_scheduler_replica
-  scheduling_strategy = "REPLICA"  # クラスター全体で必要数のタスクを維持する
+  scheduling_strategy = "REPLICA" # クラスター全体で必要数のタスクを維持する
 
   # 新しくタスクが立ち上がった際、この秒数だけヘルスチェックの失敗を無視する
   health_check_grace_period_seconds = 300
 
   network_configuration {
-    subnets = var.subnets
-    security_groups = [ aws_security_group.esc_service_sg.id ]
+    subnets          = var.subnets
+    security_groups  = [aws_security_group.esc_service_sg.id]
     assign_public_ip = false
   }
 
