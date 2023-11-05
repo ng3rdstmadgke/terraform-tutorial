@@ -42,8 +42,8 @@ data "aws_caller_identity" "self" {}
 data "aws_region" "current" {}
 
 variable "vpc_id" { type = string }
-variable "subnets" { type = list(string) }
 variable "alb_subnets" { type = list(string) }
+variable "subnets" { type = list(string) }
 variable "app_image_uri" { type = string }
 variable "cicd_artifact_bucket" { type = string }
 variable "db_user" { type = string }

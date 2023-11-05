@@ -178,6 +178,7 @@ touch terraform/envs/${ENV_NAME}/environment.auto.tfvars
 ```hcl
 vpc_id = "vpc-xxxxxxxxxxxxxxxxx"
 
+// ALBを配置するためのサブネット (public)
 alb_subnets = ["subnet-xxxxxxxxxxxxxxxxx", "subnet-xxxxxxxxxxxxxxxxx"]
 ```
 

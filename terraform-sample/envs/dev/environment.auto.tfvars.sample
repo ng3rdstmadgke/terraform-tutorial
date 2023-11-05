@@ -1,9 +1,12 @@
 vpc_id = "vpc-xxxxxxxxxxxxxxxxx"
 
-subnets = ["subnet-xxxxxxxxxxxxxxxxx", "subnet-xxxxxxxxxxxxxxxxx"]
-
+// ALBを配置するためのサブネット (public)
 alb_subnets = ["subnet-xxxxxxxxxxxxxxxxx", "subnet-xxxxxxxxxxxxxxxxx"]
 
+// ECSタスク・データベースを配置するためのサブネット (private)
+subnets = ["subnet-xxxxxxxxxxxxxxxxx", "subnet-xxxxxxxxxxxxxxxxx"]
+
+// ECRリポジトリ
 app_image_uri = "xxxxxxxxxxxx.dkr.ecr.ap-northeast-1.amazonaws.com/xxxxxxxxxxxxxxxxxxxxxxxxxx"
 
 cicd_artifact_bucket = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"

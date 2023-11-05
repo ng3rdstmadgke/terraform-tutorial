@@ -1,10 +1,10 @@
 {
-  "taskDefinitionArn": "arn:aws:ecs:ap-northeast-1:674582907715:task-definition/terraformtutorial-dev-app:2",
+  "taskDefinitionArn": "arn:aws:ecs:ap-northeast-1:674582907715:task-definition/terraformtutorial-dev-app:4",
   "containerDefinitions": [
     {
       "name": "app",
       "image": "<IMAGE1_NAME>",
-      "cpu": 1024,
+      "cpu": 512,
       "memory": 1024,
       "portMappings": [
         {
@@ -54,7 +54,7 @@
   "taskRoleArn": "arn:aws:iam::674582907715:role/terraformtutorial-dev-EcsTaskRole",
   "executionRoleArn": "arn:aws:iam::674582907715:role/terraformtutorial-dev-EcsTaskExecutionRole",
   "networkMode": "awsvpc",
-  "revision": 2,
+  "revision": 4,
   "volumes": [],
   "status": "ACTIVE",
   "requiresAttributes": [
@@ -107,9 +107,9 @@
   "requiresCompatibilities": [
     "FARGATE"
   ],
-  "cpu": "2048",
-  "memory": "4096",
-  "registeredAt": "2023-11-04T16:14:38.329000+00:00",
+  "cpu": "512",
+  "memory": "1024",
+  "registeredAt": "2023-11-05T08:43:37.299000+00:00",
   "registeredBy": "arn:aws:iam::674582907715:user/admin-cli",
   "ephemeralStorage": {
     "sizeInGiB": 32
