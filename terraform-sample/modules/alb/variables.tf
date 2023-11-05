@@ -1,7 +1,15 @@
 variable "app_name" {}
 variable "stage" {}
+
+// セキュリティグループが所属するVPC
 variable "vpc_id" {}
-variable "alb_subnets" { type = list(string) }
+
+// ALBが所属するサブネット
+variable "alb_subnets" {
+  type = list(string)
+}
+
+// ALBがアクセスを許可するIPアドレス
 variable "ingress_rules_cidr_blocks" {
   type    = list(string)
   default = ["0.0.0.0/0"]

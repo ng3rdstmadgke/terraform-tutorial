@@ -70,20 +70,6 @@ locals {
   }
 }
 
-module "db" {
-  source              = "../../modules/db"
-  app_name            = local.app_name
-  stage               = local.stage
-  vpc_id              = var.vpc_id
-  subnets             = var.subnets
-  db_name             = local.stage
-  db_user             = var.db_user
-  db_password         = var.db_password
-  ingress_cidr_blocks = [local.vpc_cidr_block]
-  instance_num        = 1
-}
-
-
 module "alb" {
   source      = "../../modules/alb"
   app_name    = local.app_name
@@ -182,4 +168,17 @@ jq -r '.containerDefinitions[0].image="<IMAGE1_NAME>"' \
 EOF
   }
   depends_on = [null_resource.make_dir]
+}
+
+module "db" {
+  source              = "../../modules/db"
+  app_name            = local.app_name
+  stage               = local.stage
+  vpc_id              = var.vpc_id
+  subnets             = var.subnets
+  db_name             = local.stage
+  db_user             = var.db_user
+  db_password         = var.db_password
+  ingress_cidr_blocks = [local.vpc_cidr_block]
+  instance_num        = 1
 }

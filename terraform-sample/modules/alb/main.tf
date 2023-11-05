@@ -12,6 +12,7 @@ resource "aws_security_group" "app_alb_sg" {
     protocol    = "tcp"
     cidr_blocks = var.ingress_rules_cidr_blocks
   }
+  // Blue/Greenデプロイのテストトラフィックルーティングで利用するポート
   ingress {
     from_port   = 8080
     to_port     = 8080

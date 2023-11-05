@@ -132,7 +132,7 @@ terraformではデプロイ状況を `terraform.tfstate` というファイル�
 
 `terraform/envs/${ENV_NAME}/main.tf`
 
-```
+```hcl
 terraform {
   // 必要なプロバイダを定義
   required_providers {
