@@ -1,5 +1,5 @@
 {
-  "taskDefinitionArn": "arn:aws:ecs:ap-northeast-1:674582907715:task-definition/TerraformTutorial-dev-app:2",
+  "taskDefinitionArn": "arn:aws:ecs:ap-northeast-1:674582907715:task-definition/terraformtutorial-dev-app:2",
   "containerDefinitions": [
     {
       "name": "app",
@@ -20,7 +20,7 @@
       "environment": [
         {
           "name": "APP_NAME",
-          "value": "TerraformTutorial"
+          "value": "terraformtutorial"
         },
         {
           "name": "STAGE",
@@ -33,7 +33,7 @@
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
-          "awslogs-group": "TerraformTutorial/dev/app/ecs-task",
+          "awslogs-group": "terraformtutorial/dev/app/ecs-task",
           "awslogs-region": "ap-northeast-1",
           "awslogs-stream-prefix": "app"
         }
@@ -50,9 +50,9 @@
       }
     }
   ],
-  "family": "TerraformTutorial-dev-app",
-  "taskRoleArn": "arn:aws:iam::674582907715:role/TerraformTutorial-dev-EcsTaskRole",
-  "executionRoleArn": "arn:aws:iam::674582907715:role/TerraformTutorial-dev-EcsTaskExecutionRole",
+  "family": "terraformtutorial-dev-app",
+  "taskRoleArn": "arn:aws:iam::674582907715:role/terraformtutorial-dev-EcsTaskRole",
+  "executionRoleArn": "arn:aws:iam::674582907715:role/terraformtutorial-dev-EcsTaskExecutionRole",
   "networkMode": "awsvpc",
   "revision": 2,
   "volumes": [],
@@ -109,8 +109,8 @@
   ],
   "cpu": "2048",
   "memory": "4096",
-  "registeredAt": "2023-11-02T08:30:21.560000+00:00",
-  "registeredBy": "arn:aws:sts::674582907715:assumed-role/BeeXEc2PowerUserAccessRole/i-0b5b69ec148d207f6",
+  "registeredAt": "2023-11-04T16:14:38.329000+00:00",
+  "registeredBy": "arn:aws:iam::674582907715:user/admin-cli",
   "ephemeralStorage": {
     "sizeInGiB": 32
   }
