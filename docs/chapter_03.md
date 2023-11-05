@@ -305,7 +305,7 @@ resource "aws_lb_listener" "app_listener_blue" {
 
 ## ECSクラスター
 
-最低1コンテナだけは `FARGATE` で、中断されることがないリソースとして構築し、 スケールアウトされたコンテナは中断される可能性がある `FARGATE_SPOT` を優先します。
+最低1コンテナだけは `FARGATE` で、中断されることがないコンテナとして動作させ、 スケールアウトされたコンテナは中断される可能性がある `FARGATE_SPOT` を優先します。
 
 `terraform/modules/app/main.tf`
 
@@ -345,7 +345,12 @@ resource "aws_ecs_cluster_capacity_providers" "app_cluster_capacity_providers" {
 
 ## ECSタスク定義
 
-タスクロールとタスク実行ロールの定義
+ECSのタスクロールとタスク実行ロールを定義します。
+
+- タスクロール
+ECSタスクに割り当てられるロール
+- タスク実行ロール
+ECSタスクを実行するために必要なロール
 
 `terraform/modules/app/iam.tf`
 
@@ -467,6 +472,9 @@ resource "aws_iam_role_policy_attachment" "attach_ecs_task_role_policy" {
 }
 ```
 
+ECSタスク定義を定義します。  
+
+
 `terraform/modules/app/main.tf`
 
 ```hcl
@@ -576,7 +584,7 @@ resource "aws_ecs_task_definition" "app_task_definition" {
 }
 ```
 
-## ECSタスク定義
+## ECSサービス
 
 `terraform/modules/app/main.tf`
 
