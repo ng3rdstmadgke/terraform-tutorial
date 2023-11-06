@@ -17,13 +17,13 @@ resource "aws_iam_role" "codebuild_service_role" {
     ]
   })
   lifecycle {
-    # NOTE: CICDアーティファクト用バケットのバケットポリシーのConditionにRoleIdを利用しているので削除してはいけない
-    #prevent_destroy = true
+    // NOTE: CICDアーティファクト用バケットのバケットポリシーのConditionにRoleIdを利用しているので削除してはいけない
+    // prevent_destroy = true
   }
 }
 
-# CodeBuildサービスロールの作成
-# https://docs.aws.amazon.com/ja_jp/codebuild/latest/userguide/setting-up.html#setting-up-service-role
+// CodeBuildサービスロールの作成
+// https://docs.aws.amazon.com/ja_jp/codebuild/latest/userguide/setting-up.html#setting-up-service-role
 resource "aws_iam_policy" "codebuild_service_policy" {
   name = "${var.app_name}-${var.stage}-CodeBuildServicePolicy"
   policy = jsonencode({
@@ -112,8 +112,8 @@ resource "aws_iam_role_policy_attachment" "attach_codebuild_service_policy" {
   policy_arn = aws_iam_policy.codebuild_service_policy.arn
 }
 
-# VPC内でCodeBuildを実行するためのポリシー
-# https://docs.aws.amazon.com/ja_jp/codebuild/latest/userguide/auth-and-access-control-iam-identity-based-access-control.html#customer-managed-policies-example-create-vpc-network-interface
+// VPC内でCodeBuildを実行するためのポリシー
+// https://docs.aws.amazon.com/ja_jp/codebuild/latest/userguide/auth-and-access-control-iam-identity-based-access-control.html#customer-managed-policies-example-create-vpc-network-interface
 resource "aws_iam_policy" "codebuild_for_vpc_policy" {
   name = "${var.app_name}-${var.stage}-CodeBuildForVpcPolicy"
   policy = jsonencode({
@@ -158,8 +158,8 @@ resource "aws_iam_role_policy_attachment" "attach_codebuild_for_vpc_policy" {
   policy_arn = aws_iam_policy.codebuild_for_vpc_policy.arn
 }
 
-# セッションマネージャーでビルド中のコンテナに接続するためのポリシー
-# https://docs.aws.amazon.com/ja_jp/codebuild/latest/userguide/session-manager.html
+// セッションマネージャーでビルド中のコンテナに接続するためのポリシー
+// https://docs.aws.amazon.com/ja_jp/codebuild/latest/userguide/session-manager.html
 resource "aws_iam_policy" "codebuild_for_ssm_policy" {
   name = "${var.app_name}-${var.stage}-CodeBuildForSsmPolicy"
   policy = jsonencode({
@@ -198,7 +198,7 @@ resource "aws_iam_role_policy_attachment" "attach_codebuild_for_ssm_policy" {
 }
 
 
-# そのほか必用なポリシー
+// そのほか必用なポリシー
 resource "aws_iam_policy" "codebuild_for_app_policy" {
   name = "${var.app_name}-${var.stage}-CodeBuildForAppPolicy"
   policy = jsonencode({
@@ -252,8 +252,8 @@ resource "aws_iam_role" "codedeploy_service_role" {
     ]
   })
   lifecycle {
-    # NOTE: CICDアーティファクト用バケットのバケットポリシーのConditionにRoleIdを利用しているので削除してはいけない
-    #prevent_destroy = true
+    // NOTE: CICDアーティファクト用バケットのバケットポリシーのConditionにRoleIdを利用しているので削除してはいけない
+    // prevent_destroy = true
   }
 }
 
@@ -281,8 +281,8 @@ resource "aws_iam_role" "codepipeline_service_role" {
     ]
   })
   lifecycle {
-    # NOTE: CICDアーティファクト用バケットのバケットポリシーのConditionにRoleIdを利用しているので削除してはいけない
-    #prevent_destroy = true
+    // NOTE: CICDアーティファクト用バケットのバケットポリシーのConditionにRoleIdを利用しているので削除してはいけない
+    // prevent_destroy = true
   }
 }
 
