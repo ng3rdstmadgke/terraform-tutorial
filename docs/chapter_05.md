@@ -1093,3 +1093,39 @@ terraform plan
 # 作成
 terraform apply -auto-approve
 ```
+
+# ■ 7. CodePipelineによるアプリのデプロイ
+
+`terraform apply` を実施すると、 `tfexports/${ENV_NAME}` 配下に `appspec.yml` , `taskdef.json` といったCodeDeployで利用されるファイルが生成されます。  
+このファイルをcommitし、EventBridgeで監視しているブランチにpushします。
+
+```bash
+git add .
+git commit -m "tfexports"
+git push codecommit main:${ENV_NAME}
+```
+
+pushするとEventBridgeがCodePipelineをキックします。  
+CodeDeployまで進んだら、「詳細」をクリックしましょう。
+
+<img src="img/05/codepipeline_01.png" width="1000px">
+
+CodeDeployの画面に進むと、Blue/Greenデプロイの管理画面が表示されます。  
+デプロイのステータスがステップ2まで進むと、テスト用のALBリスナー(8080)からデプロイ中のコンテナにアクセスすることができますので、ブラウザでアクセスしてみましょう。  
+(`terraform output alb_host_name` で出力されるURLに8080ポートを指定してアクセスしてみましょう)
+
+http://xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.ap-northeast-1.elb.amazonaws.com:8080/
+
+問題なくアクセスできるようであれば「トラフィックの再ルーティング」をクリックし、本番用のリスナー(80)がデプロイ中のコンテナに向くようになります。
+
+
+<img src="img/05/codedeploy_01.png" width="1000px">
+
+デプロイのステータスがステップ4まで進むと、本番用のリスナー(80)がデプロイ中のコンテナに向いた状態になります。
+「元のタスクセットの終了」をクリックすると、古いコンテナを終了させることができます。
+
+<img src="img/05/codedeploy_02.png" width="1000px">
+
+デプロイのステータスがステップ6まで完了したら、デプロイ完了です。
+
+<img src="img/05/codedeploy_03.png" width="1000px">
