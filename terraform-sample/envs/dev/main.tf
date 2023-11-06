@@ -41,6 +41,7 @@ data "aws_caller_identity" "self" {}
 // 現在のリージョンを取得するデータソース
 data "aws_region" "current" {}
 
+// 変数定義
 variable "vpc_id" { type = string }
 variable "alb_subnets" { type = list(string) }
 variable "subnets" { type = list(string) }
@@ -49,14 +50,7 @@ variable "cicd_artifact_bucket" { type = string }
 variable "db_user" { type = string }
 variable "db_password" { type = string }
 
-output "alb_host_name" {
-  value = module.alb.app_alb.dns_name
-}
-
-output "task_definition" {
-  value = "${module.app.ecs_task_family}:${module.app.ecs_task_revision}"
-}
-
+// ローカル変数を定義
 locals {
   aws_region      = data.aws_region.current.name
   account_id      = data.aws_caller_identity.self.account_id
@@ -68,6 +62,19 @@ locals {
     "APP_NAME" : local.app_name,
     "STAGE" : local.stage,
   }
+}
+
+// 出力
+output "alb_host_name" {
+  value = module.alb.app_alb.dns_name
+}
+
+output "task_definition" {
+  value = "${module.app.ecs_task_family}:${module.app.ecs_task_revision}"
+}
+
+output db_secrets_manager_arn {
+  value = module.db.db_secrets_manager_arn
 }
 
 module "alb" {

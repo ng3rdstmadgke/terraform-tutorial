@@ -696,7 +696,7 @@ locals {
   account_id      = data.aws_caller_identity.self.account_id
   app_name        = replace(lower("terraformtutorial"), "-", "")
   stage           = "ステージ名"
-  vpc_cidr_block  = "10.53.0.0/16"  // 追加
+  vpc_cidr_block  = "xxx.xxx.xxx.xxx/xx"  // 追加
   env = {  // 追加
     "APP_NAME" : local.app_name,
     "STAGE" : local.stage,

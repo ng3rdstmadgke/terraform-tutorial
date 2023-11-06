@@ -1,7 +1,3 @@
-output "db_host" {
-  value = aws_rds_cluster.aurora_serverless_mysql80.endpoint
-}
-
-output "db_port" {
-  value = aws_rds_cluster.aurora_serverless_mysql80.port
+output db_secrets_manager_arn {
+  value = aws_secretsmanager_secret.aurora_serverless_mysql80.arn
 }

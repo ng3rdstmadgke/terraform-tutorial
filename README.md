@@ -6,4 +6,4 @@
 - [Chapter3 - ECS](docs/chapter_03.md)
 - [Chapter4 - オートスケーリング](docs/chapter_04.md)
 - [Chapter5 - CICD](docs/chapter_05.md)
-- [Chapter6 - データベース作成](docs/chapter_06.md)
+- [Chapter6 - データベース](docs/chapter_06.md)

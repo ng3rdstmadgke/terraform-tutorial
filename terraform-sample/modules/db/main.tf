@@ -1,6 +1,56 @@
-#
-# DBクラスタ (Aurora Serverless v2)
-#
+/**
+ * RDSクラスタ (Aurora Serverless v2)
+ * aws_rds_cluster: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/rds_cluster
+ * aws_rds_cluster_parameter_group: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/rds_cluster_parameter_group
+ */
+// Requirements for Aurora Serverless V2 : https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-serverless-v2.requirements.html
+resource "aws_rds_cluster" "aurora_serverless_mysql80" {
+  cluster_identifier = "${var.app_name}-${var.stage}-aurora-serverless-v2-mysql80-cluster"
+
+  engine = "aurora-mysql"
+  // 利用可能なバージョンの一覧
+  /*
+    aws rds describe-orderable-db-instance-options \
+      --engine aurora-mysql \
+      --db-instance-class db.serverless \
+      --region ap-northeast-1 \
+      --query 'OrderableDBInstanceOptions[].[EngineVersion]' \
+      --output text
+  */
+  engine_version = "8.0.mysql_aurora.3.05.0"
+
+  database_name   = var.db_name
+  master_username = var.db_user
+  master_password = var.db_password
+  port            = local.db_port
+
+  db_cluster_parameter_group_name = aws_rds_cluster_parameter_group.aurora_serverless_mysql80.name
+
+  backup_retention_period = 7
+
+  // aws_rds_cluster_instance.db_subnet_group_nameと一致している必要がある
+  db_subnet_group_name   = aws_db_subnet_group.aurora_serverless_mysql80.name
+  vpc_security_group_ids = [aws_security_group.aurora_serverless_mysql80.id]
+
+  // スケールアップ/ダウン時の最小ACU, 最大ACUを定義
+  serverlessv2_scaling_configuration {
+    min_capacity = 0.5 // 0.5 ~
+    max_capacity = 1.0 // ~ 128
+  }
+
+  // 削除時にスナップショットを作成しな時
+  skip_final_snapshot = true
+  // スナップショットを取得したい場合は final_snapshot_identifier が必要
+  #final_snapshot_identifier = "${var.app_name}-${var.stage}-aurora-serverless-v2-mysql80-cluster-final-snapshot-${timestamp()}"
+
+  lifecycle {
+    ignore_changes = [
+      master_password // パスワードが変更されていても無視する
+    ]
+    #prevent_destroy = true
+  }
+}
+
 resource "aws_rds_cluster_parameter_group" "aurora_serverless_mysql80" {
   name   = "${var.app_name}-${var.stage}-aurora-serverless-v2-mysql80-cluster-parameter-group"
   family = "aurora-mysql8.0"
@@ -69,60 +119,11 @@ resource "aws_security_group" "aurora_serverless_mysql80" {
   }
 }
 
-// aws_rds_cluster: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/rds_cluster
-// Requirements for Aurora Serverless V2 : https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-serverless-v2.requirements.html
-resource "aws_rds_cluster" "aurora_serverless_mysql80" {
-  cluster_identifier = "${var.app_name}-${var.stage}-aurora-serverless-v2-mysql80-cluster"
 
-  engine = "aurora-mysql"
-  // 利用可能なバージョンの一覧
-  /*
-    aws rds describe-orderable-db-instance-options \
-      --engine aurora-mysql \
-      --db-instance-class db.serverless \
-      --region ap-northeast-1 \
-      --query 'OrderableDBInstanceOptions[].[EngineVersion]' \
-      --output text
-  */
-  engine_version = "8.0.mysql_aurora.3.05.0"
-
-  database_name   = var.db_name
-  master_username = var.db_user
-  master_password = var.db_password
-  port            = local.db_port
-
-  db_cluster_parameter_group_name = aws_rds_cluster_parameter_group.aurora_serverless_mysql80.name
-
-  backup_retention_period = 7
-
-  // aws_rds_cluster_instance.db_subnet_group_nameと一致している必要がある
-  db_subnet_group_name   = aws_db_subnet_group.aurora_serverless_mysql80.name
-  vpc_security_group_ids = [aws_security_group.aurora_serverless_mysql80.id]
-
-  // スケールアップ/ダウン時の最小ACU, 最大ACUを定義
-  serverlessv2_scaling_configuration {
-    min_capacity = 0.5 // 0.5 ~
-    max_capacity = 1.0 // ~ 128
-  }
-
-  // 削除時にスナップショットを作成しな時
-  skip_final_snapshot = true
-  // スナップショットを取得したい場合は final_snapshot_identifier が必要
-  #final_snapshot_identifier = "${var.app_name}-${var.stage}-aurora-serverless-v2-mysql80-cluster-final-snapshot-${timestamp()}"
-
-  lifecycle {
-    ignore_changes = [
-      master_password // パスワードが変更されていても無視する
-    ]
-    #prevent_destroy = true
-  }
-}
-
-#
-# DBインスタンス (Aurora Serverless v2)
-#
-
-// aws_rds_cluster_instance: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/rds_cluster_instance
+/**
+ * DBインスタンス (Aurora Serverless v2)
+ * aws_rds_cluster_instance: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/rds_cluster_instance
+ */
 resource "aws_rds_cluster_instance" "aurora_serverless_mysql80" {
   // DBインスタンスをいくつ作るか
   // 例)
@@ -149,9 +150,10 @@ resource "aws_db_parameter_group" "aurora_serverless_mysql80" {
   family = "aurora-mysql8.0"
 }
 
-#
-# DBのログイン情報を保持する SecretsManager
-#
+/**
+ * DBのログイン情報を保持する SecretsManager
+ * aws_secretsmanager_secret: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret
+ */
 resource "aws_secretsmanager_secret" "aurora_serverless_mysql80" {
   name                           = "/${var.app_name}/${var.stage}/db"
   recovery_window_in_days        = 0
@@ -168,11 +170,9 @@ resource "aws_secretsmanager_secret_version" "aurora_serverless_mysql80" {
   })
 }
 
-
-
-#
-# 普通のRDS
-#
+/**
+ * 普通のRDS
+ */
 /*
 resource "aws_security_group" "app_db_sg" {
   name = "${var.app_name}-${var.stage}-db"
@@ -267,7 +267,7 @@ resource "aws_db_instance" "app_db" {
 
 
 #
-# DBのログイン情報を保持する SecretsManager
+// DBのログイン情報を保持する SecretsManager
 #
 resource "aws_secretsmanager_secret" "app_db_secret" {
   name = "/${var.app_name}/${var.stage}/db"
