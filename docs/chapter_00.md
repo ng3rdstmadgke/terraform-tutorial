@@ -152,7 +152,9 @@ git remote add codecommit リモートリポジトリのURL
 git push codecommit main
 ```
 
-# ■ terraformデプロイ
+# ■ サンプルのデプロイ (やりたい人だけ)
+
+完成サンプルをデプロイしてみたい方はこちらのコマンドで試してみてください。
 
 ```bash
 cd terraform-sample/envs/dev
@@ -161,7 +163,7 @@ terraform plan
 terraform apply -auto-approve
 ```
 
-# ■ リソースの削除
+リソースの削除
 
 ```bash
 cd terraform-sample/envs/dev
