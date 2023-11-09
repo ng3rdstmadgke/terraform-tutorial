@@ -68,6 +68,8 @@ output db_secret_manager_arn {
 
 # ■ 4. リソース定義
 
+Aurora Serverless v2 で MySQL8.0 互換のDBクラスタを作成します。
+
 
 ```hcl
 /**
@@ -245,8 +247,6 @@ resource "aws_secretsmanager_secret_version" "aurora_serverless_mysql80" {
 ```
 
 # ■ 5. 定義したモジュールをエントリーポイントから参照する
-
-TODO: appspec.yml, taskdef.json の生成
 
 `terraform/envs/${ENV_NAME}/main.tf`
 
