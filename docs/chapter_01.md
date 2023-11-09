@@ -5,26 +5,278 @@ Chapter1 Terraform入門
 
 # ■ 0. Terraform入門
 
-このチュートリアルではTerraform自体をどう利用するのかは説明しません。  
-Terraform自体の説明は下記を参考にしてみてください。
+- [Terraform公式ドキュメント](https://developer.hashicorp.com/terraform)
 
-- [それ、どこに出しても恥ずかしくない Terraformコードになってるか？ | AWS](https://esa-storage-tokyo.s3-ap-northeast-1.amazonaws.com/uploads/production/attachments/5809/2023/07/07/19598/c89126e6-8d48-4e34-a654-6fd29b63756e.pdf)
-- 公式ドキュメント
-  - [Providers](https://developer.hashicorp.com/terraform/language/providers)  
-  - [Resources](https://developer.hashicorp.com/terraform/language/resources)  
-    インフラオブジェクトを記述するためのブロック。
-    - [Meta-Arguments](https://developer.hashicorp.com/terraform/language/meta-arguments/depends_on)  
-    depends_on, count, for_each, lifecycleなどどのリソースでも共通で利用できるパラメータに関する説明
-  - [Data Sources](https://developer.hashicorp.com/terraform/language/data-sources)  
-  - [Variable and Outputs](https://developer.hashicorp.com/terraform/language/values)  
-  variable, output, locals など変数定義や出力で利用するブロック
-  - [Modules](https://developer.hashicorp.com/terraform/language/modules)  
-  複数リソースをまとめるための仕組み
-  - [Functions](https://developer.hashicorp.com/terraform/language/functions)  
-  Terraform内で利用できる組み込み関数
+## Terraformとは
+
+
+TerraformはCloudFormationやCDKのように、インフラを宣言的に記述できるツールです。  
+Terraformの記述にはHCL(HashiCorp Configuration Language)と呼ばれる独自言語を利用します。
+裏でCloudFormationが動いているわけではないので、デプロイしてもAWSマネジメントコンソールのCloudFormationの画面にスタックは作成されません。  
+代わりに `terraform.tfstate` というファイルが生成され、このファイルに現在管理しているリソースなどの情報(状態)が保存されます。
+
+## `terraform.tfstate` とは
+
+`terraform.tfstate` にはterraform が現在管理しているリソースなどが保存されています。terraformはtfstateの内容とソースコードの差分を取って作成・変更・削除すべきリソースを抽出し、対象リソースのみをデプロイします。
+
+`terraform.tfstate` は「現状デプロイされているリソースを管理する」という役割上、 環境に複数存在してはならず、同時に編集されてもいけません。しかしながら、デフォルトの設定ではこのファイルはローカルに生成され、重複と同時編集を許すことになってしまいます。
+
+今回のチュートリアルでは、保存場所をs3に指定し、DynamoDBで同時編集に対するロックをかける方法を実装していきましょう。
+
+## HCLとは
+
+HCL (HashiCorp Configuration Language) はTerraformを記述するための独自言語です。  
+ここでは、Terraformで利用する構文を少しだけ紹介します。
+
+- 公式ドキュメントはこちら: [Terraform Language Documentation](https://developer.hashicorp.com/terraform/language)
+
+### Providers
+
+- [Providers | Terraform](https://developer.hashicorp.com/terraform/language/providers)
+
+TerraformはawsだけでなくGCPやAzureといったマルチプラットフォームで利用できるツールですが、それぞれのシステムとやりとりをするために、「プロバイダ」というプラグインを利用利用します。  
+awsならawsプロバイダ、GCPならgoogleプロバイダといった具合に、バックエンドとなるサービスごとにプロバイダが存在し、プロバイダをインストールしていない状態では、いかなるインフラも定義することはできません。
+
+
+`terraform.required_providers` 必要なプロバイダを定義し、`provider` ブロックでインストールしたプロバイダの設定を行います。
+
+- [AWS Provider](https://registry.terraform.io/providers/hashicorp/aws/latest/docs)
+
+```hcl
+terraform {
+  required_providers { // 必要なプロバイダを定義
+    aws = { // awsプロバイダのインストール
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
+
+provider "aws" { // awsプロバイダの設定
+  region = "ap-northeast-1"
+}
+```
+
+### Resources
+
+- [Resources | Terraform](https://developer.hashicorp.com/terraform/language/resources)  
+
+
+`resource` ブロックではVPCやサブネット、EC2といったインフラオブジェクトを定義します。`resource` ブロックで定義できるインフラはプロバイダごとに定義されており、awsであれば、[aws provider ドキュメント](https://registry.terraform.io/providers/hashicorp/aws/latest/docs) から調べることができます。
+
+
+例えばAWSインスタンスは下記のように定義します。
+`aws_instance` はリソースタイプで、 `some` は任意の名前となります。 (リソースタイプと名前の組み合わせはモジュール内でユニークでなければなりません。)
+
+- [aws_instance | aws provider](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance)
+
+
+```hcl
+resource "aws_instance" "some" {
+  ami           = "ami-a1b2c3d4"
+  instance_type = "t2.micro"
+}
+```
+
+※ 補足  
+リソースには、リソースごとの設定のほかに、どのリソースも共通して利用可能な [Meta-Arguments](https://developer.hashicorp.com/terraform/language/meta-arguments/depends_on) という設定値があります。
+Meta-Argumentsには、リソースの依存関係を明確にするための `depends_on` 、 リソースの数を指定する `count` 、 変更無視や削除禁止などを定義する `lifecycle` などがあります。
+
+例えば、初回デプロイ後に変更・削除されないALBを作るには `lifecycle` を利用します。
+
+```hcl
+resource "aws_lb" "app_alb" {
+  name               = "app-alb"
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.app_alb_sg.id]
+  subnets            = ["xxxxxxxxxx", "xxxxxxxxxx]
+  ip_address_type    = "ipv4"
+  idle_timeout       = 60
+
+  lifecycle {
+    # 変更を適用しない https://developer.hashicorp.com/terraform/language/meta-arguments/lifecycle#ignore_changes
+    ignore_changes = all
+    # 強制的なリソースの再作成が起こらないようにする https://developer.hashicorp.com/terraform/language/meta-arguments/lifecycle#prevent_destroy
+    prevent_destroy = true
+  }
+}
+
+```
+
+### DataSource
+
+- [Data Sources](https://developer.hashicorp.com/terraform/language/data-sources)  
+
+`data` ブロックはTerraformの外部で定義されたリソースを参照するためのブロックです。 `data` ブロックで定義されたデータリソースは読み取り専用で、たとえ変更したとしても既存のリソースが更新・削除されることはありません。
+
+例えば `data` ブロックで取得したamiの参照を利用して `aws_instance` リソースを定義するには、下記のように実装します。
+
+- [aws_ami | aws provider]()https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance
+
+```hcl
+data "aws_ami" "this" {  // 既存のamiの参照を取得
+  most_recent = true
+  owners      = ["amazon"]
+  filter {
+    name   = "architecture"
+    values = ["arm64"]
+  }
+  filter {
+    name   = "name"
+    values = ["al2023-ami-2023*"]
+  }
+}
+
+resource "aws_instance" "some" {  // amiの参照を指定してEC2インスタンスを定義
+  ami           = data.aws_ami.this.id
+  instance_type = "t2.micro"
+}
+```
+
+### Valiable・Output
+
+- [Variable and Outputs](https://developer.hashicorp.com/terraform/language/values)  
+
+`variable` ブロックで入力変数、 `output` ブロックで出力値 、 `locals` ブロックでローカル変数を定義することができます。
+
+
+#### 1. variable
+
+- [Input Variables | Terraform](https://developer.hashicorp.com/terraform/language/values/variables)
+
+`variable` ブロックはモジュールの入力変数を定義します。(いわゆる関数における引数です)   
+`variable` ブロックで定義した変数は、terraformをデプロイするときに入力を求められます。  
+`variable` ブロックには、型を指定する `type` 、 デフォルト値を指定する `default` などいくつかの引数があります。
+
+※ `type` には [Types and Values | Terraform](https://developer.hashicorp.com/terraform/language/expressions/types) の型が指定できます。
+
+
+```hcl
+
+variable "image_id" {
+  type = string
+  default = "ami-xxxxxx"
+}
+
+resource "aws_instance" "some" {
+  ami           = var.image_id  // variableを参照
+  instance_type = "t2.micro"
+}
+```
+
+
+#### 2. output
+
+- [Output Values | Terraform](https://developer.hashicorp.com/terraform/language/values/outputs)
+
+`output` ブロックはモジュールの出力値を定義します。(いわゆる関数における戻り値です。)  
+`output` ブロックで定義した出力値は、モジュールの外から参照できます。別のモジュールに値を引き渡したいときに利用します。
+
+```hcl
+
+resource "aws_instance" "some" {
+  ami           = "ami-xxxxx"
+  instance_type = "t2.micro"
+}
+
+output instance_arn {
+  value = aws_instance.some.arn
+}
+```
+
+#### 3. locals
+
+- [Local Values | Terraform](https://developer.hashicorp.com/terraform/language/values/locals)
+
+ローカル変数には、モジュール内で何度も繰り返し利用する値などを定義します。(いわゆる関数におけるローカル変数です。)  
+
+
+```hcl
+
+locals {
+  instance_type = "t2.micro"
+}
+
+resource "aws_instance" "some" {
+  ami           = "ami-xxxxx"
+  instance_type = locals.instance_type
+}
+
+resource "aws_instance" "other" {
+  ami           = "ami-xxxxx"
+  instance_type = locals.instance_type
+}
+
+```
+
+### Modules
+
+- [Modules](https://developer.hashicorp.com/terraform/language/modules)  
+
+
+モジュールはいくつかのリソースを再利用可能な粒度でまとめるための機能です。  
+モジュールはディレクトリ単位で作られ、あるディレクトリに格納されている `tf` ファイルの集まりがモジュールとなります。
+
+例えば、下記のようなディレクトリ構成の場合、 `terraform/alb` 配下の `main.tf` `variables.tf` `outputs.tf` が一つのモジュールとなります。
+
+
+```
+- terraform/
+  - main.tf
+  - alb/
+    - main.tf
+    - variables.tf
+    - outputs.tf
+```
+
+`terraform/main.tf` から `alb` モジュールを利用するには、下記のように実装します。
+
+```hcl
+module "some_alb" {
+  source = "./alb"
+  // albモジュールが variable を持つ場合は引数として与えます
+  some_variable = "hogehoge"
+  other_variable = 3
+}
+
+// albモジュールが output を持つ場合は参照することができます
+retource "aws_xxxxxxxxxxx" "xxxxxxxxx" {
+  alb_arn = module.some_alb.arn
+}
+```
+
+
+### Functions
+
+- [Functions](https://developer.hashicorp.com/terraform/language/functions)  
+
+Terraformには様々な組み込み関数が実装されており、文字列や数値などのちょっとした編集が可能です。  
+`terraform console` を起動していくつかの関数を実行してみましょう
+
+```bash
+terraform console
+```
+
+```
+> max(5, 12, 9)
+12
+
+> lower("Hello")
+"hello"
+
+> contains(["a", "b", "c"], "a")
+true
+
+> jsonencode({hello = "world", foo = 3})
+"{\"foo\":3,\"hello\":\"world\"}"
+```
 
 
 ## 利用する主なコマンド
+
+- [Terraform CLI Documentation](https://developer.hashicorp.com/terraform/cli)
+
+
 
 ```bash
 # プロバイダプラグインのインストールなど、terraformコマンドを利用するための初期化処理を行うコマンド
@@ -58,10 +310,13 @@ terraform apply
 terraform destroy
 ```
 
+## そのほか参考資料
+
+- [それ、どこに出しても恥ずかしくない Terraformコードになってるか？ | AWS](https://esa-storage-tokyo.s3-ap-northeast-1.amazonaws.com/uploads/production/attachments/5809/2023/07/07/19598/c89126e6-8d48-4e34-a654-6fd29b63756e.pdf)
 
 # ■ 1. ディレクトリ作成
 
-terraformリソースは `terraform/` ディレクトリ配下に定義します。
+プロジェクトのディレクトリを作成しましょう。 terraformリソースは `terraform/` ディレクトリ配下に定義します。
 
 ## ディレクトリ構成
 
@@ -125,10 +380,10 @@ EOF
 # ■ 2. プロバイダの設定
 
 今回作成するリソースはすべてAWSのリソースであるため、 `hashicorp/aws` プロバイダプラグインをインストールして、それを利用できるように設定していきます。  
-terraformではデプロイ状況を `terraform.tfstate` というファイルで管理しますが、デフォルトだとこのファイルはローカルに生成されてしまうため、s3バケットに保存するように設定します。  
+terraformではリソースを `terraform.tfstate` というファイルで管理しますが、デフォルトだとこのファイルはローカルに生成されてしまうため、s3バケットに保存するように設定します。  
 また、terraformでは環境に対して同時に操作を行うと環境が壊れてしまうため、 `terraform.tfstate` にロック機構を設けることで環境に同時に操作が行われることを防止します。このロックはDynamoDBで管理します。
 
-
+- [AWS Provider](https://registry.terraform.io/providers/hashicorp/aws/latest/docs)
 
 `terraform/envs/${ENV_NAME}/main.tf`
 
