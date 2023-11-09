@@ -21,13 +21,13 @@ variable "ecs_service_name" {}
 // 本番用のターゲットグループ
 variable "app_tg_1_name" {}
 
-// テスト用のターゲットグループ
+// スタンバイ用のターゲットグループ
 variable "app_tg_2_name" {}
 
 // 本番用のリスナーARN
 variable "lb_listener_green_arn" {}
 
-// テスト用のリスナーARN
+// スタンバイ用のリスナーARN
 variable "lb_listener_blue_arn" {}
 
 // CodePipelineのアーティファクトを格納するS3バケット

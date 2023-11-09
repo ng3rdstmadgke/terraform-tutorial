@@ -118,8 +118,10 @@ output "container_port" {
 
 ## ALBのターゲットグループ・リスナー
 
-Blue/Greenデプロイを利用するため、本番用のリスナーとテスト用の2つのリスナーを作成します。
+Blue/Greenデプロイを利用するため、本番用のリスナーとスタンバイ用の2つのリスナーを作成します。
 HTTPSの利用の有無で作成するリスナーが異なります。
+
+※ [3分でわかる ブルーグリーンデプロイメント | 日経XTECH](https://xtech.nikkei.com/atcl/nxt/keyword/18/00002/070800077/)
 
 - HTTPSを利用する
   - `HTTPS:443`  
@@ -127,12 +129,12 @@ HTTPSの利用の有無で作成するリスナーが異なります。
   - `HTTP:80` :  
   ターゲット: `HTTPS:443` にリダイレクト
   - `HTTP:8080`  
-  ターゲット: テスト用のECSコンテナ
+  ターゲット: スタンバイ用のECSコンテナ
 - HTTPSを利用しない
   - `HTTP:80` :  
   ターゲット: 本番用のECSコンテナ
   - `HTTP:8080`  
-  ターゲット: テスト用のECSコンテナ
+  ターゲット: スタンバイ用のECSコンテナ
 
 
 
@@ -167,7 +169,7 @@ resource "aws_lb_target_group" "app_tg_1" {
   }
 }
 
-// テスト用リスナーにアタッチするターゲットグループ
+// スタンバイ用リスナーにアタッチするターゲットグループ
 resource "aws_lb_target_group" "app_tg_2" {
   name        = "${var.app_name}-${var.stage}-app-tg-2"
   port        = "80"
@@ -280,7 +282,7 @@ resource "aws_lb_listener" "app_listener_green_http" {
  * HTTPS/HTTP共通のALBリスナー
  * aws_lb_listener: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_listener
  */
-// HTTP:8080 テスト用リスナー (Blue)
+// HTTP:8080 スタンバイ用リスナー (Blue)
 resource "aws_lb_listener" "app_listener_blue" {
   load_balancer_arn = var.app_alb_arn
   port              = "8080"
@@ -585,6 +587,8 @@ resource "aws_ecs_task_definition" "app_task_definition" {
 ```
 
 ## ECSサービス
+
+※ ECSサービスはECSのタスク数を管理するためのリソースです。
 
 `terraform/modules/app/main.tf`
 

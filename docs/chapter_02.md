@@ -65,6 +65,7 @@ output "app_alb" {
 
 
 ALBとそのセキュリティグループを作成します。  
+※ ALBは再作成が走るとURLが変わってしまうため、本番で利用する場合は `lifecycle.prevent_destroy = true` を設定するとよいです。 (個人的には気づかないで変更してしまうことも避けたいので `lifecycle.ignore_changes = all` を設定しています。この辺はお好みで。)  
 
 
 `terraform/modules/alb/main.tf`

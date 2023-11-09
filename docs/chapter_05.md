@@ -46,13 +46,13 @@ variable "ecs_service_name" {}
 // 本番用のターゲットグループ
 variable "app_tg_1_name" {}
 
-// テスト用のターゲットグループ
+// スタンバイ用のターゲットグループ
 variable "app_tg_2_name" {}
 
 // 本番用のリスナーARN
 variable "lb_listener_green_arn" {}
 
-// テスト用のリスナーARN
+// スタンバイ用のリスナーARN
 variable "lb_listener_blue_arn" {}
 
 // CodePipelineのアーティファクトを格納するS3バケット
@@ -712,7 +712,7 @@ resource "aws_codedeploy_deployment_group" "this" {
         listener_arns = [var.lb_listener_green_arn]
       }
 
-      // テスト用のリスナー (HTTP:8080)
+      // スタンバイ用のリスナー (HTTP:8080)
       test_traffic_route {
         listener_arns = [var.lb_listener_blue_arn]
       }
@@ -1111,7 +1111,7 @@ CodeDeployまで進んだら、「詳細」をクリックしましょう。
 <img src="img/05/codepipeline_01.png" width="1000px">
 
 CodeDeployの画面に進むと、Blue/Greenデプロイの管理画面が表示されます。  
-デプロイのステータスがステップ2まで進むと、テスト用のALBリスナー(8080)からデプロイ中のコンテナにアクセスすることができますので、ブラウザでアクセスしてみましょう。  
+デプロイのステータスがステップ2まで進むと、スタンバイ用のALBリスナー(8080)からデプロイ中のコンテナにアクセスすることができますので、ブラウザでアクセスしてみましょう。  
 (`terraform output alb_host_name` で出力されるURLに8080ポートを指定してアクセスしてみましょう)
 
 http://xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.ap-northeast-1.elb.amazonaws.com:8080/

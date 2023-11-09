@@ -26,7 +26,7 @@ resource "aws_lb_target_group" "app_tg_1" {
   }
 }
 
-// テスト用リスナーにアタッチするターゲットグループ
+// スタンバイ用リスナーにアタッチするターゲットグループ
 resource "aws_lb_target_group" "app_tg_2" {
   name        = "${var.app_name}-${var.stage}-app-tg-2"
   port        = "80"
@@ -139,7 +139,7 @@ resource "aws_lb_listener" "app_listener_green_http" {
  * HTTPS/HTTP共通のALBリスナー
  * aws_lb_listener: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_listener
  */
-// HTTP:8080 テスト用リスナー (Blue)
+// HTTP:8080 スタンバイ用リスナー (Blue)
 resource "aws_lb_listener" "app_listener_blue" {
   load_balancer_arn = var.app_alb_arn
   port              = "8080"

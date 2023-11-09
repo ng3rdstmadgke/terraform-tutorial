@@ -143,7 +143,7 @@ resource "aws_codedeploy_deployment_group" "this" {
         listener_arns = [var.lb_listener_green_arn]
       }
 
-      // テスト用のリスナー (HTTP:8080)
+      // スタンバイ用のリスナー (HTTP:8080)
       test_traffic_route {
         listener_arns = [var.lb_listener_blue_arn]
       }

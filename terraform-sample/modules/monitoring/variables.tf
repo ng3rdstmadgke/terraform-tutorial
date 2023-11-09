@@ -10,7 +10,7 @@ variable "ecs_service_name" {}
 // 本番用ターゲットグループのARNのサフィックス
 variable "app_tg_1_arn_suffix" {}
 
-// テスト用ターゲットグループのARNのサフィックス
+// スタンバイ用ターゲットグループのARNのサフィックス
 variable "app_tg_2_arn_suffix" {}
 
 // オートスケーリングの最大台数
