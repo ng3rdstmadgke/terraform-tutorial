@@ -1,1 +1,2 @@
-fastapi[all]
+fastapi[all]~=0.104.1
+click~=8.1.7
