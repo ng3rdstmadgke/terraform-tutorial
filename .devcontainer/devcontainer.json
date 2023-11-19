@@ -1,6 +1,7 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
-// README at: https://github.com/devcontainers/templates/tree/main/src/ubuntu
+// VS Code Dev Containerこと始め: https://zenn.dev/arkbig/articles/devcontainer_8d4f6fd4ade4efa79e0277fef1ad06470ae68
 {
+  // README at: https://github.com/devcontainers/templates/tree/main/src/ubuntu
   "name": "Ubuntu",
   // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
   // "image": "mcr.microsoft.com/devcontainers/base:jammy",
@@ -32,6 +33,15 @@
       //       ホストのポートをフォワーディングできるようにhostネットワークを利用する
       "--network=host"
   ],
+
+  "containerEnv": {
+    // ホスト側のプロジェクトディレクトリ
+    // https://zenn.dev/arkbig/articles/devcontainer_8d4f6fd4ade4efa79e0277fef1ad06470ae68#variables-in-devcontainer.json
+    "HOST_PROJECT_ROOT": "${localWorkspaceFolder}",
+    // コンテナ側のプロジェクトディレクトリ
+    // https://zenn.dev/arkbig/articles/devcontainer_8d4f6fd4ade4efa79e0277fef1ad06470ae68#variables-in-devcontainer.json
+    "CONTAINER_PROJECT_ROOT": "${containerWorkspaceFolder}"
+  },
 
   // Features to add to the dev container. More info: https://containers.dev/features.
   // "features": {},
