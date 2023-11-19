@@ -129,18 +129,19 @@ module "cicd" {
 }
 
 resource "null_resource" "make_dir" {
-  # https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource
+  // https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource
   triggers = {
     always_run = timestamp()
   }
+  // local-exec: https://developer.hashicorp.com/terraform/language/resources/provisioners/local-exec
   provisioner "local-exec" {
     command = "mkdir -p ../../../tfexports/${local.stage}"
   }
 }
 
-# appspec.ymlを作成
+// appspec.ymlを作成
 resource "local_file" "appspec_yml" {
-  # https://registry.terraform.io/providers/hashicorp/local/latest/docs/resources/file
+  // https://registry.terraform.io/providers/hashicorp/local/latest/docs/resources/file
   filename = "../../../tfexports/${local.stage}/appspec.yaml"
   content  = <<EOF
 version: 0.0
@@ -158,9 +159,9 @@ EOF
   depends_on = [null_resource.make_dir]
 }
 
-# taskdef.jsonを作成
+// taskdef.jsonを作成
 resource "null_resource" "run_script" {
-  # https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource
+  // https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource
   triggers = {
     always_run = timestamp()
   }
