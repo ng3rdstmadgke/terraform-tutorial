@@ -13,12 +13,14 @@
 .PHONY: build
 .PHONY: clean
 
+FUNCTION_NAME :=
 UID := $(shell id -u)
 GID := $(shell id -g)
-CONTAINER_BUILD_DIR := ${CONTAINER_PROJECT_ROOT}/.lambda-build
-HOST_BUILD_DIR := ${HOST_PROJECT_ROOT}/.lambda-build
+CONTAINER_BUILD_DIR := ${CONTAINER_PROJECT_ROOT}/.lambda-build/${FUNCTION_NAME}
+HOST_BUILD_DIR := ${HOST_PROJECT_ROOT}/.lambda-build/${FUNCTION_NAME}
 DOCKER_IMAGE := terraform-tutorial/local/lambda-build:latest
 API_PYTHON_FILES := $(wildcard $(CONTAINER_PROJECT_ROOT)/app/api/**/*.py)
+required = $(if $(value $(1)),,$(error $(1) is empty! Please set it))
 
 # $(foreach 変数,リスト,処理)
 package: $(CONTAINER_BUILD_DIR)/layer $(CONTAINER_BUILD_DIR)/src
@@ -43,6 +45,7 @@ $(CONTAINER_BUILD_DIR)/layer: $(CONTAINER_PROJECT_ROOT)/app/requirements.txt $(C
 
 # lambda layer ビルド用のDockerイメージを作成
 $(CONTAINER_BUILD_DIR)/.lambda-build: $(CONTAINER_PROJECT_ROOT)/docker/lambda-build/Dockerfile
+	$(call required,FUNCTION_NAME)
 	mkdir -p $(CONTAINER_BUILD_DIR)
 	docker build --rm \
 		--build-arg host_uid=$(UID) \
@@ -53,5 +56,6 @@ $(CONTAINER_BUILD_DIR)/.lambda-build: $(CONTAINER_PROJECT_ROOT)/docker/lambda-bu
 
 # お片付け
 clean:
+	$(call required,FUNCTION_NAME)
 	rm -rf ${CONTAINER_BUILD_DIR}
 	docker rmi $(DOCKER_IMAGE)
