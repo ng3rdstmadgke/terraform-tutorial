@@ -1,5 +1,5 @@
 def handler(event, context):
-    print("=== === === batch_success_handler === === ===")
+    print("=== === === batch_error_handler === === ===")
 
 if __name__ == "__main__":
     event = {}

@@ -1,29 +1,3 @@
-variable "app_name" { }
-variable "stage" { }
-variable "lambda_role_arn" { }
-variable "function_name" { }
-variable "handler" {}
-variable "vpc_id" { }
-variable "subnets" {
-  type=list(string)
-}
-variable "env" { type = map }
-
-variable "memory_size" {
-  default = 128
-  type    = number
-}
-
-variable "ephemeral_storage_size" {
-  default = 512
-  type    = number
-}
-
-
-output "lambda_function" {
-  value = aws_lambda_function.lambda_function
-}
-
 resource "null_resource" "package_lambda_resource" {
   // https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource
   triggers = {
