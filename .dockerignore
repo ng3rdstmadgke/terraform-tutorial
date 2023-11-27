@@ -1,3 +1,18 @@
+#
+# Python
+#
+**/__pycache__
+*.py[cod]
+*$py.class
+**/.ipynb_checkpoints/
+
+# C extensions
+*.so
+
+**/.venv
+
+#
+# Other
+#
 terraform/*
 .lambda-build/
-**/.venv

@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Terraform Tutorial</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+  </head>
+  <body>
+    <div class="container">
+      <h1>Create Job</h1>
+      <form id="js_form">
+        <div class="mb-3">
+          <label for="n" class="form-label">n</label>
+          <input type="number" class="form-control" id="n" aria-describedby="emailHelp">
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        document.getElementById("js_form").addEventListener("submit", function(event){
+          let form = event.currentTarget;
+          if (!form.reportValidity()) {
+            return
+          }
+          // デフォルトの挙動をキャンセル
+          event.preventDefault();
+          let n = document.getElementById("n");
+          fetch("/api/jobs/", {
+            method: "POST",
+            body: JSON.stringify({
+              "n": document.getElementById("n").value,
+            }),
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }).then((response) => {
+            if (!response.ok) {
+              // json() の戻り値は Promise なので、さらに then() で結果を受け取る
+              throw new Error(`アイテム登録失敗 (${response.statusText})`)
+            }
+            location.href = "/"
+          }).catch((error) => {
+            console.log(error);
+          })
+        });
+      })
+    </script>
+  </body>
+</html>

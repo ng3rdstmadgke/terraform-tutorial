@@ -16,7 +16,7 @@ resource "aws_lb_target_group" "app_tg_1" {
     timeout             = 5
     healthy_threshold   = 3
     unhealthy_threshold = 3
-    path                = "/healthcheck"
+    path                = "/api/healthcheck/"
     protocol            = "HTTP"
     matcher             = "200"
   }
@@ -39,7 +39,7 @@ resource "aws_lb_target_group" "app_tg_2" {
     timeout             = 5
     healthy_threshold   = 3
     unhealthy_threshold = 3
-    path                = "/healthcheck"
+    path                = "/api/healthcheck/"
     protocol            = "HTTP"
     matcher             = "200"
   }
@@ -289,7 +289,7 @@ resource "aws_ecs_task_definition" "app_task_definition" {
       // dockerのヘルスチェック機能: https://docs.docker.jp/engine/reference/run.html#run-healthcheck
       // 書き方: https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/aws-properties-ecs-taskdefinition-healthcheck.html
       HealthCheck = {
-        command     = ["CMD-SHELL", "curl -H 'User-Agent: Docker-HealthChecker' -f 'http://localhost/healthcheck' || exit 1"]
+        command     = ["CMD-SHELL", "curl -H 'User-Agent: Docker-HealthChecker' -f 'http://localhost/api/healthcheck/' || exit 1"]
         interval    = 15
         timeout     = 5
         retries     = 3

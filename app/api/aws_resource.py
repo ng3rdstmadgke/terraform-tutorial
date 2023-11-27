@@ -29,7 +29,7 @@ class AwsResource:
         secret = client.get_secret_value(SecretId=self.env.db_secret_name)['SecretString']
         return DBSecret.model_validate_json(secret)
 
-    def send_message(sub: str, message: str, obj: Union[Dict,BaseModel,str]):
+    def send_message(self, sub: str, message: str, obj: Union[Dict,BaseModel,str]):
         if isinstance(obj, BaseModel):
             obj_str = obj.model_dump_json(indent=2)
         elif isinstance(obj, dict):
@@ -37,15 +37,15 @@ class AwsResource:
         else:
             obj_str = obj
 
-        sub = f"[terraform-tutorial][{env.stage}] ${sub}"
+        sub = f"[terraform-tutorial][{self.env.stage}] ${sub}"
         msg = "Message:\n{message}\n\nObject:\n{obj_str}"
         client = self.__get_client('sns')
-        client.publish(TopicArn=env.sns_arn, Subject=sub, Message=msg)
+        client.publish(TopicArn=self.env.sns_arn, Subject=sub, Message=msg)
 
-    def send_fibonacci_job(self, n: int) -> str:
+    def send_fibonacci_job(self, job_id: int, n: int) -> str:
         client = self.__get_client('sqs')
         response = client.send_message(
             QueueUrl=self.env.fibonacci_job_queue_url,
-            MessageBody=json.dumps({'n': n})
+            MessageBody=json.dumps({"job_id": job_id, "n": n})
         )
         return response['MessageId']

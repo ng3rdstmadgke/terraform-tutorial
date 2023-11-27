@@ -48,6 +48,7 @@ docker build \
 docker run \
   --rm \
   -ti \
+  -v ${HOST_PROJECT_ROOT}/app:/opt/app \
   --env-file $ENV_ABS_PATH \
   --network host \
   -p "80:80" \

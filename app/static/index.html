@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Terraform Tutorial</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+  </head>
+  <body>
+    <div class="container">
+      <h1>Job List</h1>
+      <div >
+        <a class="btn btn-primary" href="/create.html" role="button">Create Job</a>
+      </div>
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Id</th>
+            <th scope="col">Args</th>
+            <th scope="col">Status</th>
+            <th scope="col">Result</th>
+            <th scope="col">Created</th>
+            <th scope="col">Updated</th>
+          </tr>
+        </thead>
+        <tbody id="js_table_body">
+        </tbody>
+      </table>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+    <script>
+      fetch("/api/jobs/", {
+        method: "GET",
+      }).then((response) => {
+        if (!response.ok) {
+          // レスポンスが200以外ならエラー
+          throw new Error(`${response.status} ${response.statusText}`)
+        }
+        // json() の戻り値は Promise なのでthen()で結果を受け取る
+        return response.json()
+      }).then((json) => {  // 成功時の処理
+        console.log(json)
+        let body = document.getElementById("js_table_body")
+        json.items.forEach((e, i) => {
+          let tr = document.createElement('tr')
+          let tdId = document.createElement('td')
+          tdId.textContent = e.id
+          tr.appendChild(tdId)
+          let tdArgs = document.createElement('td')
+          tdArgs.textContent = e.args
+          tr.appendChild(tdArgs)
+          let tdStatus = document.createElement('td')
+          tdStatus.textContent = e.status
+          tr.appendChild(tdStatus)
+          let tdResult = document.createElement('td')
+          tdResult.textContent = e.result
+          tr.appendChild(tdResult)
+          let tdCreated = document.createElement('td')
+          tdCreated.textContent = e.created
+          tr.appendChild(tdCreated)
+          let tdUpdate = document.createElement('td')
+          tdUpdate.textContent = e.updated
+          tr.appendChild(tdUpdate)
+          body.appendChild(tr)
+        })
+      }).catch((error) => {  // エラー時の処理
+        console.log(error.message)
+      })
+    </script>
+  </body>
+</html>
