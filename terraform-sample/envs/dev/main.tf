@@ -191,10 +191,32 @@ module "db" {
   instance_num        = 1
 }
 
-module "batch-base" {
+module "batch_base" {
   source              = "../../modules/batch_base"
   app_name            = local.app_name
   stage               = local.stage
   vpc_id              = var.vpc_id
   subnets             = var.subnets
+}
+
+module "batch_cmd_01" {
+  source              = "../../modules/batch_cmd"
+  account_id          = local.account_id
+  app_name            = local.app_name
+  stage               = local.stage
+  batch_name          = "batch_cmd_01"
+  env = {}
+  batch_job_queue_arn = module.batch_base.job_queue_arn
+  image_uri           = var.app_image_uri
+  image_tag           = "latest"
+  command             = [
+    "python",
+    "/opt/app/batch_cmd/fibonacci.py",
+    "-b",
+    "Ref::queue_input",  # SQSに送信されたキューのBody
+  ]
+  success_handler_arn = module.batch_base.success_handler.arn
+  error_handler_arn = module.batch_base.error_handler.arn
+  vcpus               = "1"
+  memory              = "2048"
 }
