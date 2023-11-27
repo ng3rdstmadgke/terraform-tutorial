@@ -199,12 +199,12 @@ module "batch_base" {
   subnets             = var.subnets
 }
 
-module "batch_cmd_01" {
+module "batch_cmd_fibonacci" {
   source              = "../../modules/batch_cmd"
   account_id          = local.account_id
   app_name            = local.app_name
   stage               = local.stage
-  batch_name          = "batch_cmd_01"
+  batch_name          = "fibonacci"
   env = {}
   batch_job_queue_arn = module.batch_base.job_queue_arn
   image_uri           = var.app_image_uri
