@@ -106,6 +106,13 @@ module "batch_base" {
   stage               = local.stage
   vpc_id              = var.vpc_id
   subnets             = var.subnets
+  env                 = {
+    "STAGE" : local.stage,
+    "SNS_ARN": module.base.sns_topic_arn,
+    "DB_NAME": local.stage,
+    "DB_SECRET_NAME": "/${local.app_name}/${local.stage}/db",
+    "JOB_QUEUE_URL": "dummy"
+  }
 }
 
 module "batch_cmd_fibonacci" {

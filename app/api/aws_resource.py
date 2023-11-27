@@ -37,8 +37,8 @@ class AwsResource:
         else:
             obj_str = obj
 
-        sub = f"[terraform-tutorial][{self.env.stage}] ${sub}"
-        msg = "Message:\n{message}\n\nObject:\n{obj_str}"
+        sub = f"[terraform-tutorial][{self.env.stage}] {sub}"
+        msg = f"Message:\n{message}\n\nObject:\n{obj_str}"
         client = self.__get_client('sns')
         client.publish(TopicArn=self.env.sns_arn, Subject=sub, Message=msg)
 

@@ -20,4 +20,5 @@ COPY app /opt/app
 COPY docker/app/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 WORKDIR /opt/app
+ENV PYTHONPATH=/opt/app
 CMD ["/usr/local/bin/entrypoint.sh"]

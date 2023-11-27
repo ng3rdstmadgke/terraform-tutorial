@@ -62,7 +62,7 @@ module "error_handler" {
   handler = "batch_error_handler.handler"
   vpc_id = var.vpc_id
   subnets = var.subnets
-  env = {}
+  env = var.env
 
   depends_on = [
     aws_iam_role.lambda_role
@@ -82,7 +82,7 @@ module "success_handler" {
   handler = "batch_success_handler.handler"
   vpc_id = var.vpc_id
   subnets = var.subnets
-  env = {}
+  env = var.env
 
   depends_on = [
     aws_iam_role.lambda_role
