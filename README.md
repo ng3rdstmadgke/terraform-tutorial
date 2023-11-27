@@ -11,4 +11,13 @@
 
 # TODO
 
-- sns
+- chapter0:
+  - ローカルDB
+    - マイグレーション
+  - ローカルスタック
+  - アプリ起動
+- chapter3: DB
+  - マイグレーション
+- chapter4: job
+- chapter5: cron
+- chapter6: ECS
