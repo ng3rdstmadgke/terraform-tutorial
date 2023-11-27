@@ -1,5 +1,5 @@
 {
-  "taskDefinitionArn": "arn:aws:ecs:ap-northeast-1:674582907715:task-definition/terraformtutorial-dev-app:4",
+  "taskDefinitionArn": "arn:aws:ecs:ap-northeast-1:674582907715:task-definition/terraformtutorial-dev-app:5",
   "containerDefinitions": [
     {
       "name": "app",
@@ -19,8 +19,20 @@
       ],
       "environment": [
         {
-          "name": "APP_NAME",
-          "value": "terraformtutorial"
+          "name": "JOB_QUEUE_URL",
+          "value": "https://sqs.ap-northeast-1.amazonaws.com/674582907715/terraformtutorial-dev-fibonacci-Queue"
+        },
+        {
+          "name": "DB_NAME",
+          "value": "dev"
+        },
+        {
+          "name": "SNS_ARN",
+          "value": "arn:aws:sns:ap-northeast-1:674582907715:terraformtutorial-dev-topic"
+        },
+        {
+          "name": "DB_SECRET_NAME",
+          "value": "/terraformtutorial/dev/db"
         },
         {
           "name": "STAGE",
@@ -41,7 +53,7 @@
       "healthCheck": {
         "command": [
           "CMD-SHELL",
-          "curl -H 'User-Agent: Docker-HealthChecker' -f 'http://localhost/healthcheck' || exit 1"
+          "curl -H 'User-Agent: Docker-HealthChecker' -f 'http://localhost/api/healthcheck/' || exit 1"
         ],
         "interval": 15,
         "timeout": 5,
@@ -54,7 +66,7 @@
   "taskRoleArn": "arn:aws:iam::674582907715:role/terraformtutorial-dev-EcsTaskRole",
   "executionRoleArn": "arn:aws:iam::674582907715:role/terraformtutorial-dev-EcsTaskExecutionRole",
   "networkMode": "awsvpc",
-  "revision": 4,
+  "revision": 5,
   "volumes": [],
   "status": "ACTIVE",
   "requiresAttributes": [
@@ -109,7 +121,7 @@
   ],
   "cpu": "512",
   "memory": "1024",
-  "registeredAt": "2023-11-05T08:43:37.299000+00:00",
+  "registeredAt": "2023-11-27T14:52:21.901000+00:00",
   "registeredBy": "arn:aws:iam::674582907715:user/admin-cli",
   "ephemeralStorage": {
     "sizeInGiB": 32

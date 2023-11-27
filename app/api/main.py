@@ -15,7 +15,7 @@ from api.schema import *
 
 env = get_env()
 
-# /api/healthcheck へのアクセスはログ出力しないようにする
+# /api/healthcheck/ へのアクセスはログ出力しないようにする
 class HealthCheckFilter(LoggingFilter):
     def filter(self, record: LogRecord) -> bool:
         return record.getMessage().find("/api/healthcheck/") == -1
@@ -27,12 +27,10 @@ getLogger("uvicorn.access").addFilter(HealthCheckFilter())
 # APIの定義
 app = FastAPI()
 
-@app.get("/api/healthcheck")
-def healthcheck():
-    return {"message": "healthy"}
-
-@app.get("/api/db-check/")
-def dbcheck(session: Session = Depends(get_session)):
+@app.get("/api/healthcheck/")
+def healthcheck(
+    session: Session = Depends(get_session)
+):
     row = session.execute(text("SELECT 'OK' as status")).first()
     return {"status": row.status}
 

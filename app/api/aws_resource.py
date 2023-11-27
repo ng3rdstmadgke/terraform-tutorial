@@ -45,7 +45,7 @@ class AwsResource:
     def send_fibonacci_job(self, job_id: int, n: int) -> str:
         client = self.__get_client('sqs')
         response = client.send_message(
-            QueueUrl=self.env.fibonacci_job_queue_url,
+            QueueUrl=self.env.job_queue_url,
             MessageBody=json.dumps({"job_id": job_id, "n": n})
         )
         return response['MessageId']

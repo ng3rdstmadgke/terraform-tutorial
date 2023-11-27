@@ -58,10 +58,6 @@ locals {
   stage           = "dev"
   vpc_cidr_block  = "10.53.0.0/16"
   repository_name = "terraform-tutorial"
-  env = {
-    "APP_NAME" : local.app_name,
-    "STAGE" : local.stage,
-  }
 }
 
 // 出力
@@ -77,12 +73,67 @@ output db_secrets_manager_arn {
   value = module.db.db_secrets_manager_arn
 }
 
+module "base" {
+  source = "../../modules/base"
+  app_name    = local.app_name
+  stage       = local.stage
+}
+
 module "alb" {
   source      = "../../modules/alb"
   app_name    = local.app_name
   stage       = local.stage
   vpc_id      = var.vpc_id
   alb_subnets = var.alb_subnets
+}
+
+module "db" {
+  source              = "../../modules/db"
+  app_name            = local.app_name
+  stage               = local.stage
+  vpc_id              = var.vpc_id
+  subnets             = var.subnets
+  db_name             = local.stage
+  db_user             = var.db_user
+  db_password         = var.db_password
+  ingress_cidr_blocks = [local.vpc_cidr_block]
+  instance_num        = 1
+}
+
+module "batch_base" {
+  source              = "../../modules/batch_base"
+  app_name            = local.app_name
+  stage               = local.stage
+  vpc_id              = var.vpc_id
+  subnets             = var.subnets
+}
+
+module "batch_cmd_fibonacci" {
+  source              = "../../modules/batch_cmd"
+  account_id          = local.account_id
+  app_name            = local.app_name
+  stage               = local.stage
+  batch_name          = "fibonacci"
+  env                 = {
+    "STAGE" : local.stage,
+    "SNS_ARN": module.base.sns_topic_arn,
+    "DB_NAME": local.stage,
+    "DB_SECRET_NAME": "/${local.app_name}/${local.stage}/db",
+    "JOB_QUEUE_URL": "dummy"
+  }
+  batch_job_queue_arn = module.batch_base.job_queue_arn
+  image_uri           = var.app_image_uri
+  image_tag           = "latest"
+  command             = [
+    "python",
+    "/opt/app/batch_cmd/fibonacci.py",
+    "-b",
+    "Ref::queue_input",  # SQSに送信されたキューのBody
+  ]
+  success_handler_arn = module.batch_base.success_handler.arn
+  error_handler_arn = module.batch_base.error_handler.arn
+  vcpus               = "1"
+  memory              = "2048"
 }
 
 module "app" {
@@ -95,7 +146,27 @@ module "app" {
   subnets             = var.subnets
   ingress_cidr_blocks = [local.vpc_cidr_block]
   app_alb_arn         = module.alb.app_alb.arn
-  env                 = local.env
+  env                 = {
+    "STAGE" : local.stage,
+    "SNS_ARN": module.base.sns_topic_arn,
+    "DB_NAME": local.stage,
+    "DB_SECRET_NAME": "/${local.app_name}/${local.stage}/db",
+    "JOB_QUEUE_URL": module.batch_cmd_fibonacci.queue_url,
+  }
+}
+
+// 環境変数ファイルを作成
+resource "local_file" "env_file" {
+  // https://registry.terraform.io/providers/hashicorp/local/latest/docs/resources/file
+  filename = "../../../env/${local.stage}.env"
+  content  = <<EOF
+STAGE=${local.stage}
+SNS_ARN=${module.base.sns_topic_arn}
+DB_NAME=${local.stage}
+DB_SECRET_NAME=/${local.app_name}/${local.stage}/db
+JOB_QUEUE_URL=${module.batch_cmd_fibonacci.queue_url}
+
+EOF
 }
 
 module "monitoring" {
@@ -176,47 +247,4 @@ jq -r '.containerDefinitions[0].image="<IMAGE1_NAME>"' \
 EOF
   }
   depends_on = [null_resource.make_dir]
-}
-
-module "db" {
-  source              = "../../modules/db"
-  app_name            = local.app_name
-  stage               = local.stage
-  vpc_id              = var.vpc_id
-  subnets             = var.subnets
-  db_name             = local.stage
-  db_user             = var.db_user
-  db_password         = var.db_password
-  ingress_cidr_blocks = [local.vpc_cidr_block]
-  instance_num        = 1
-}
-
-module "batch_base" {
-  source              = "../../modules/batch_base"
-  app_name            = local.app_name
-  stage               = local.stage
-  vpc_id              = var.vpc_id
-  subnets             = var.subnets
-}
-
-module "batch_cmd_fibonacci" {
-  source              = "../../modules/batch_cmd"
-  account_id          = local.account_id
-  app_name            = local.app_name
-  stage               = local.stage
-  batch_name          = "fibonacci"
-  env = {}
-  batch_job_queue_arn = module.batch_base.job_queue_arn
-  image_uri           = var.app_image_uri
-  image_tag           = "latest"
-  command             = [
-    "python",
-    "/opt/app/batch_cmd/fibonacci.py",
-    "-b",
-    "Ref::queue_input",  # SQSに送信されたキューのBody
-  ]
-  success_handler_arn = module.batch_base.success_handler.arn
-  error_handler_arn = module.batch_base.error_handler.arn
-  vcpus               = "1"
-  memory              = "2048"
 }

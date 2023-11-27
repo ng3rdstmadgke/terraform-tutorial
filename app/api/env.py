@@ -10,7 +10,7 @@ class Environment(BaseSettings):
     sns_arn: str
     db_name: str
     db_secret_name: str
-    fibonacci_job_queue_url: str
+    job_queue_url: str
     local: bool = False
 
     # 以下はローカル環境でのみ利用する環境変数
