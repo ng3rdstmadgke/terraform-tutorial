@@ -146,6 +146,8 @@ module "app" {
   subnets             = var.subnets
   ingress_cidr_blocks = [local.vpc_cidr_block]
   app_alb_arn         = module.alb.app_alb.arn
+  sns_topic_arn       = module.base.sns_topic_arn
+  job_queue_arn       = module.batch_cmd_fibonacci.queue_arn
   env                 = {
     "STAGE" : local.stage,
     "SNS_ARN": module.base.sns_topic_arn,
