@@ -1,4 +1,5 @@
 #!/bin/bash
 
-set -eo
-pip install -r app/requirements.txt
+set -ex
+
+pip install -r app/requirements-dev.txt

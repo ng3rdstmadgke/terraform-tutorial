@@ -55,7 +55,9 @@
     "HOST_PROJECT_ROOT": "${localWorkspaceFolder}",
     // コンテナ側のプロジェクトディレクトリ
     // https://zenn.dev/arkbig/articles/devcontainer_8d4f6fd4ade4efa79e0277fef1ad06470ae68#variables-in-devcontainer.json
-    "CONTAINER_PROJECT_ROOT": "${containerWorkspaceFolder}"
+    "CONTAINER_PROJECT_ROOT": "${containerWorkspaceFolder}",
+    // pythonのパスを指定するための環境変数
+    "PYTHONPATH": "${containerWorkspaceFolder}/app"
   },
 
   // Features to add to the dev container. More info: https://containers.dev/features.

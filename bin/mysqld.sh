@@ -25,6 +25,7 @@ docker run \
   --network host \
   --name terraform-tutorial-mysql \
   -e MYSQL_ROOT_PASSWORD=$DB_PASSWORD \
+  -e MYSQL_DATABASE=$DB_NAME \
   terraform-tutorial/local/mysql:latest
 
 docker run \

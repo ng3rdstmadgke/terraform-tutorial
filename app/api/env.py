@@ -1,5 +1,6 @@
 from functools import lru_cache
 from pydantic_settings import BaseSettings
+from typing import Optional
 
 class Environment(BaseSettings):
     """環境変数を定義する構造体。
@@ -10,8 +11,11 @@ class Environment(BaseSettings):
     db_name: str
     db_secret_name: str
     fibonacci_job_queue_url: str
-    debug: bool = False
+    local: bool = False
 
+    # 以下はローカル環境でのみ利用する環境変数
+    aws_endpoint_url: Optional[str] = None
+    aws_region: str = "ap-northeast-1"
 
 @lru_cache
 def get_env() -> Environment:

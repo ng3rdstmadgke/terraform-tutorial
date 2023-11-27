@@ -1,7 +1,13 @@
-from fastapi import FastAPI
 from typing import Union
 from logging import config, getLogger, LogRecord, Filter as LoggingFilter
+
+from fastapi import FastAPI, Depends
+from sqlalchemy.orm import Session
+from sqlalchemy.sql import text
+
 from api.env import get_env
+from api.session import get_session
+from api.aws_resource import AwsResource
 
 env = get_env()
 
@@ -25,9 +31,13 @@ def read_root():
 def healthcheck():
     return {"message": "healthy"}
 
-@app.get("/fibonacci")
-def fibonacci(cnt: int = 100):
-    arr = [1, 1]
-    for i in range(cnt):
-        arr.append(arr[i] + arr[i + 1])
-    return {"fibonacci": arr[len(arr) - 1]}
+@app.get("/db-check/")
+def dbcheck(session: Session = Depends(get_session)):
+    row = session.execute(text("SELECT 'OK' as status")).first()
+    return {"status": row.status}
+
+@app.get("/fibonacci/")
+def fibonacci(n: int = 100):
+    aws_resource = AwsResource()
+    message_id = aws_resource.send_fibonacci_job(n)
+    return {"message_id": message_id}
