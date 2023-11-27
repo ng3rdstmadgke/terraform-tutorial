@@ -5,7 +5,6 @@ ROOT_DIR="$(cd $(dirname $0)/..; pwd)"
 cd $ROOT_DIR
 
 ENV_PATH="${ROOT_DIR}/env/local.env"
-
 export $(cat $ENV_PATH | grep -v -e "^ *#")
 
 set -e

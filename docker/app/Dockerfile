@@ -1,6 +1,6 @@
 FROM python:3.11-slim-bookworm
 RUN apt update && \
-    apt install -y locales curl && \
+    apt install -y locales curl make jq default-mysql-client  && \
     apt upgrade -y
 RUN echo 'ja_JP.UTF-8 UTF-8' >> /etc/locale.gen && \
     locale-gen && \
