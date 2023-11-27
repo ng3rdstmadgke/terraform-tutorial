@@ -13,18 +13,28 @@
     "ghcr.io/devcontainers-contrib/features/terraform-asdf:2": {},
     // NOTE: docker outside of dockerを利用するための設定
     //       https://github.com/devcontainers/features/tree/main/src/docker-outside-of-docker
-    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
+    // NOTE: AWS CLIを利用するための設定
+    //       https://github.com/devcontainers/features/tree/main/src/aws-cli
+    "ghcr.io/devcontainers/features/aws-cli:1": {},
+    // NOTE: Pythonを利用するための設定
+    //       https://github.com/devcontainers/features/tree/main/src/python
+    "ghcr.io/devcontainers/features/python:1": {}
 
   },
-
+ 
   // devcontainerからgithubにsshを利用してpushするための設定
   "mounts": [
     "source=${localEnv:HOME}/.ssh,target=/home/vscode/.ssh,type=bind,consistency=cached",
     "source=${localEnv:HOME}/.aws,target=/home/vscode/.aws,type=bind,consistency=cached"
   ],
 
+  // https://containers.dev/implementors/json_reference/#image-specific
   "build": {
-    "dockerfile": "Dockerfile"
+    "dockerfile": "Dockerfile",
+    // docker buildを実行するパス。 (devcontainer.jsonからの相対パス)
+    // 実行パスがプロジェクトのルートになることで、Dockerfile内で "COPY app/requirements.txt /tmp/requirements.txt" みたいなコマンドが実行できる
+    "context": ".."
   },
 
   // docker run コマンドに追加する引数
@@ -33,6 +43,11 @@
       //       ホストのポートをフォワーディングできるようにhostネットワークを利用する
       "--network=host"
   ],
+
+  // 開発コンテナ起動時に実行するコマンド
+  // 他にもupdateContentCommand, postCreateCommand, postStartCommandなどがある
+  // Lifecyle script: https://containers.dev/implementors/json_reference/#lifecycle-scripts
+  "onCreateCommand": "/bin/bash .devcontainer/on-create.sh",
 
   "containerEnv": {
     // ホスト側のプロジェクトディレクトリ
