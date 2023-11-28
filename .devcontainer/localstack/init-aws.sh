@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # LocalStack - init-fooks: https://docs.localstack.cloud/references/init-hooks/
+# デバッグコマンド: docker logs terraform-tutorial_devcontainer-localstack-1  | less
 set -ex
 
 printenv

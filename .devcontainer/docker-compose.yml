@@ -4,7 +4,7 @@ services:
     build:
       context: ../
       dockerfile: docker/devcontainer/Dockerfile
-    volumes:
+    volumes:  # docker-compose.yml があるディレクトリからの相対パスで指定する
       - ..:/workspace:cached
       - ~/.aws:/home/vscode/.aws:cached
       - ~/.ssh:/home/vscode/.ssh:cached
@@ -22,8 +22,8 @@ services:
       - DOCKER_HOST=unix:///var/run/docker.sock
     volumes:
       # LocalStack - init-fooks: https://docs.localstack.cloud/references/init-hooks/
-      - .devcontainer/localstack/init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh
-      - "/var/run/docker.sock:/var/run/docker.sock"
+      - ./localstack:/etc/localstack/init/ready.d
+      - /var/run/docker.sock:/var/run/docker.sock
     networks:
       br-terraform-tutorial:
         ipv4_address: 192.168.44.20

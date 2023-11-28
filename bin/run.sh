@@ -75,7 +75,6 @@ docker build \
   -t terraform-tutorial/local/app:latest .
 
 CONTAINER_NAME="terraform-tutorial-${MODE}"
-CMD=
 
 if [ "$MODE" = "app" ]; then
   docker run \
