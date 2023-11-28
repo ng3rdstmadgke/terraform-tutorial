@@ -119,7 +119,7 @@ resource "aws_sfn_state_machine" "pipe_target" {
                       "Command": var.command
                     }
                   },
-                  "ResultPath": "$.deploy_job",
+                  "ResultPath": "$.batch",
                   "Next": "OnSuccess"
                 },
                 "OnSuccess": {
