@@ -78,7 +78,6 @@ aws ecr create-repository --repository-name $REPOSITORY_NAME
 docker build --rm -f docker/app/Dockerfile -t ${REPOSITORY_NAME}:latest .
 
 # ECRにログイン
-mv -f /home/vscode/.docker/config.json /home/vscode/.docker/config.json.back  # 初期配置のconfig.jsonではログインできない
 aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
 
 # ECRにイメージをpush

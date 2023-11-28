@@ -8,19 +8,17 @@
 
   // features一覧: https://containers.dev/features
   "features": {
-    // NOTE: terraformを利用するための設定
-    //       https://github.com/devcontainers/features/tree/main/src/terraform
+    "ghcr.io/devcontainers/features/git:1": {},
+    // terraformを利用するための設定: https://github.com/devcontainers/features/tree/main/src/terraform
     "ghcr.io/devcontainers-contrib/features/terraform-asdf:2": {},
-    // NOTE: docker outside of dockerを利用するための設定
-    //       https://github.com/devcontainers/features/tree/main/src/docker-outside-of-docker
+    // docker outside of dockerを利用するための設定: https://github.com/devcontainers/features/tree/main/src/docker-outside-of-docker
     "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
-    // NOTE: AWS CLIを利用するための設定
-    //       https://github.com/devcontainers/features/tree/main/src/aws-cli
+    // AWS CLIを利用するための設定 https://github.com/devcontainers/features/tree/main/src/aws-cli
     "ghcr.io/devcontainers/features/aws-cli:1": {},
-    // NOTE: Pythonを利用するための設定
-    //       https://github.com/devcontainers/features/tree/main/src/python
-    "ghcr.io/devcontainers/features/python:1": {}
-
+    // Pythonを利用するための設定: https://github.com/devcontainers/features/tree/main/src/python
+    "ghcr.io/devcontainers/features/python:1": {},
+    // PlantUML用のjava: https://github.com/devcontainers/features/tree/main/src/java
+    "ghcr.io/devcontainers/features/java:1": {}
   },
  
   // devcontainerからgithubにsshを利用してpushするための設定
@@ -48,6 +46,7 @@
   // 他にもupdateContentCommand, postCreateCommand, postStartCommandなどがある
   // Lifecyle script: https://containers.dev/implementors/json_reference/#lifecycle-scripts
   "onCreateCommand": "/bin/bash .devcontainer/on-create.sh",
+  "postAttachCommand": "rm -f /home/vscode/.docker/config.json",  // NOTE: 初期配置のconfig.jsonが存在するとECRにログインできない
 
   "containerEnv": {
     // ホスト側のプロジェクトディレクトリ
@@ -73,7 +72,41 @@
   "customizations": {
     "vscode": {
       "extensions": [
-        "hashicorp.terraform"
+        // Docs
+        "hediet.vscode-drawio",
+        "yzhang.markdown-all-in-one",
+        "bierner.github-markdown-preview",
+        "bierner.markdown-mermaid",
+        "jebbs.plantuml",
+
+        // IaC
+        "hashicorp.terraform",
+        "ms-vscode.makefile-tools",
+        "ms-azuretools.vscode-docker",
+        "saramorillon.terraform-graph",
+
+        // Backend
+        "ms-python.vscode-pylance",
+        "ms-python.black-formatter",
+        "matangover.mypy",
+        "charliermarsh.ruff",
+        "njpwerner.autodocstring",
+        "ms-toolsai.jupyter",
+
+        // Frontend
+        "ms-vscode.vscode-typescript-next",
+        "Vue.vscode-typescript-vue-plugin",
+        "vuetifyjs.vuetify-vscode",
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint",
+        "Vue.volar",
+
+        // DevTools
+        "mhutchie.git-graph",
+        "redhat.vscode-xml",
+        "GitHub.copilot",
+        "GitHub.copilot-chat"
+
       ]
     }
   }
