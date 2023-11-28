@@ -1,0 +1,63 @@
+version: '3.2'
+services:
+  main:
+    build:
+      context: ../
+      dockerfile: docker/devcontainer/Dockerfile
+    volumes:
+      - ..:/workspace:cached
+      - ~/.aws:/home/vscode/.aws:cached
+      - ~/.ssh:/home/vscode/.ssh:cached
+    command: sleep infinity
+    networks:
+      br-terraform-tutorial:
+        ipv4_address: 192.168.44.10
+
+  localstack:
+    image: localstack/localstack:latest
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - DEBUG=1
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    volumes:
+      # LocalStack - init-fooks: https://docs.localstack.cloud/references/init-hooks/
+      - .devcontainer/localstack/init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    networks:
+      br-terraform-tutorial:
+        ipv4_address: 192.168.44.20
+
+  mysql:
+    build:
+      context: ../
+      dockerfile: docker/mysql/Dockerfile
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+    healthcheck:
+      test: [
+        "CMD-SHELL",
+        "MYSQL_PWD=${DB_PASSWORD}",
+        "mysqladmin",
+        "ping",
+        "-u",
+        "${DB_USER}",
+        "-h",
+        "${DB_HOST}",
+        "-P",
+        "${DB_PORT}"
+      ]
+      interval: 5s
+      retries: 5
+    networks:
+      br-terraform-tutorial:
+        ipv4_address: 192.168.44.30
+networks:
+  br-terraform-tutorial:
+    name: br-terraform-tutorial
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.44.0/24

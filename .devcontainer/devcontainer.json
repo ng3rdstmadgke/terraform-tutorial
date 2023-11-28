@@ -2,7 +2,24 @@
 // VS Code Dev Containerこと始め: https://zenn.dev/arkbig/articles/devcontainer_8d4f6fd4ade4efa79e0277fef1ad06470ae68
 {
   // README at: https://github.com/devcontainers/templates/tree/main/src/ubuntu
-  "name": "Ubuntu",
+  "name": "main",
+
+  "service": "main",
+
+  "shutdownAction": "none",
+
+  "dockerComposeFile": [
+    "docker-compose.yml"
+  ],
+
+  "runServices": [
+    "main",
+    "localstack",
+    "mysql"
+  ],
+
+  "workspaceFolder": "/workspace",
+
   // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
   // "image": "mcr.microsoft.com/devcontainers/base:jammy",
 
@@ -22,25 +39,25 @@
   },
  
   // devcontainerからgithubにsshを利用してpushするための設定
-  "mounts": [
-    "source=${localEnv:HOME}/.ssh,target=/home/vscode/.ssh,type=bind,consistency=cached",
-    "source=${localEnv:HOME}/.aws,target=/home/vscode/.aws,type=bind,consistency=cached"
-  ],
+  // "mounts": [
+  //   "source=${localEnv:HOME}/.ssh,target=/home/vscode/.ssh,type=bind,consistency=cached",
+  //   "source=${localEnv:HOME}/.aws,target=/home/vscode/.aws,type=bind,consistency=cached"
+  // ],
 
   // https://containers.dev/implementors/json_reference/#image-specific
-  "build": {
-    "dockerfile": "Dockerfile",
-    // docker buildを実行するパス。 (devcontainer.jsonからの相対パス)
-    // 実行パスがプロジェクトのルートになることで、Dockerfile内で "COPY app/requirements.txt /tmp/requirements.txt" みたいなコマンドが実行できる
-    "context": ".."
-  },
+  // "build": {
+  //   "dockerfile": "Dockerfile",
+  //   // docker buildを実行するパス。 (devcontainer.jsonからの相対パス)
+  //   // 実行パスがプロジェクトのルートになることで、Dockerfile内で "COPY app/requirements.txt /tmp/requirements.txt" みたいなコマンドが実行できる
+  //   "context": ".."
+  // },
 
-  // docker run コマンドに追加する引数
-  "runArgs": [
-      // NOTE: これがないとポートフォワード時にdevcontainerのポートをフォワーディングしてしまう。
-      //       ホストのポートをフォワーディングできるようにhostネットワークを利用する
-      "--network=host"
-  ],
+  // // docker run コマンドに追加する引数
+  // "runArgs": [
+  //     // NOTE: これがないとポートフォワード時にdevcontainerのポートをフォワーディングしてしまう。
+  //     //       ホストのポートをフォワーディングできるようにhostネットワークを利用する
+  //     "--network=host"
+  // ],
 
   // 開発コンテナ起動時に実行するコマンド
   // 他にもupdateContentCommand, postCreateCommand, postStartCommandなどがある
@@ -58,6 +75,10 @@
     // pythonのパスを指定するための環境変数
     "PYTHONPATH": "${containerWorkspaceFolder}/app"
   },
+
+  // "remoteEnv": {
+  //   "LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}"
+  // },
 
   // Features to add to the dev container. More info: https://containers.dev/features.
   // "features": {},

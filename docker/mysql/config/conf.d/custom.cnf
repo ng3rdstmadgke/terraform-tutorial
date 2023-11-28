@@ -1,6 +1,6 @@
 [client]
-port=53308
+port=3306
 
 [mysqld]
-port=53308
+port=3306
 default_authentication_plugin=mysql_native_password

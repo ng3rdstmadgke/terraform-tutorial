@@ -84,7 +84,7 @@ if [ "$MODE" = "app" ]; then
     --name terraform-tutorial-app \
     -v ${HOST_PROJECT_ROOT}/app:/opt/app \
     --env-file $ENV_ABS_PATH \
-    --network host \
+    --network br-terraform-tutorial \
     -p "80:80" \
     terraform-tutorial/local/app:latest
 elif [ "$MODE" = "shell" ]; then
@@ -93,7 +93,7 @@ elif [ "$MODE" = "shell" ]; then
     -ti \
     -v ${HOST_PROJECT_ROOT}/app:/opt/app \
     --env-file $ENV_ABS_PATH \
-    --network host \
+    --network br-terraform-tutorial \
     terraform-tutorial/local/app:latest \
     /bin/bash
 fi
