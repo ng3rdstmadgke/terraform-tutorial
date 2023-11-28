@@ -17,21 +17,13 @@ cat <<EOF >&2
     shell: /bin/bashを起動
 
 [EXAMPLE]
-  # mysql起動
-  ./bin/mysqld.sh
-
-  # localstack起動
-  ./bin/local-stackd.sh
-
   # マイグレーション
   $0 -m shell
-  ./bin/create-database.sh
-  alembic upgrade head
+  ./bin/init-database.sh
   exit
 
   # アプリ起動
   $0
-
 
 EOF
 exit 1
@@ -86,6 +78,7 @@ if [ "$MODE" = "app" ]; then
     --network br-terraform-tutorial \
     -p "80:80" \
     terraform-tutorial/local/app:latest
+
 elif [ "$MODE" = "shell" ]; then
   docker run \
     --rm \
