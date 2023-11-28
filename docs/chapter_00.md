@@ -38,6 +38,11 @@ Chapter0 概要・前準備
 
 
 ```bash
+# データベースの初期化
+./bin/run.sh -m shell
+./bin/init-database.sh
+exit
+
 # アプリの起動
 ./bin/run.sh
 ```
@@ -47,6 +52,7 @@ Chapter0 概要・前準備
 
 <img src="img/00/fastapi_docs.png" width="700px">
 
+APIの確認ができたら、 http://localhost/ にアクセスしてアプリを操作してみましょう。
 
 
 
