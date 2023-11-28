@@ -1,12 +1,9 @@
 #!/bin/bash
 
-set -ex
+set -e
 
-SECRET_STRING="$(aws --endpoint-url $AWS_ENDPOINT_URL secretsmanager get-secret-value --secret-id "$DB_SECRET_NAME" --query 'SecretString' --output text)"
-DB_PASSWORD=$(echo "$SECRET_STRING" | jq -r '.db_password')
-DB_USER=$(echo "$SECRET_STRING" | jq -r '.db_user')
-DB_HOST=$(echo "$SECRET_STRING" | jq -r '.db_host')
-DB_PORT=$(echo "$SECRET_STRING" | jq -r '.db_port')
-DB_NAME=$(echo $DB_NAME)
+SCRIPT_DIR=$(cd $(dirname $0); pwd)
+source $SCRIPT_DIR/lib/settings.sh
 
+set -x
 MYSQL_PWD=$DB_PASSWORD mysql -u $DB_USER -h $DB_HOST -P $DB_PORT $DB_NAME
