@@ -1,4 +1,4 @@
-Chapter6 データベース
+Chapter2 データベース
 ---
 [READMEに戻る](../README.md)
 
@@ -6,7 +6,7 @@ Chapter6 データベース
 
 この章ではECSのオートスケーリング機能を作成します。
 
-<img src="img/06/drawio/architecture.drawio.png" width="900px">
+<img src="img/02/drawio/architecture.drawio.png" width="900px">
 
 # ■ 2. モジュールの作成
 

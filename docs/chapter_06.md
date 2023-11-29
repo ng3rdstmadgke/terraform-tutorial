@@ -1,4 +1,4 @@
-Chapter2 ロードバランサー
+Chapter6 ロードバランサー
 ---
 [READMEに戻る](../README.md)
 
@@ -6,7 +6,7 @@ Chapter2 ロードバランサー
 
 この章ではロードバランサーを作成します。
 
-<img src="img/02/drawio/architecture.drawio.png" width="900px">
+<img src="img/06/drawio/architecture.drawio.png" width="900px">
 
 
 # ■ 2. モジュールの作成

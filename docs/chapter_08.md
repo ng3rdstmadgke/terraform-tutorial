@@ -1,4 +1,4 @@
-Chapter4 オートスケーリング
+Chapter8 オートスケーリング
 ---
 [READMEに戻る](../README.md)
 
@@ -6,7 +6,7 @@ Chapter4 オートスケーリング
 
 この章ではECSのオートスケーリング機能を作成します。
 
-<img src="img/04/drawio/architecture.drawio.png" width="900px">
+<img src="img/08/drawio/architecture.drawio.png" width="900px">
 
 # ■ 2. モジュールの作成
 
@@ -268,6 +268,6 @@ while :; do curl "http://xxxxxxxxxxxxxxxxxxxxxxxxxxxxx.ap-northeast-1.elb.amazon
 
 CloudWatchがアラーム状態となり、負荷に応じた数のECSのタスクが新たに起動します。
 
-<img src="img/04/cloudwatch.png" width="700px">
+<img src="img/08/cloudwatch.png" width="700px">
 
-<img src="img/04/ecs_task.png" width="700px">
+<img src="img/08/ecs_task.png" width="700px">

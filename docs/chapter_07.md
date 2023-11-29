@@ -1,4 +1,4 @@
-Chapter3 ECS
+Chapter7 ECS
 ---
 [READMEに戻る](../README.md)
 
@@ -6,7 +6,7 @@ Chapter3 ECS
 
 この章ではECSを作成します。
 
-<img src="img/03/drawio/architecture.drawio.png" width="900px">
+<img src="img/07/drawio/architecture.drawio.png" width="900px">
 
 # ■ 2. モジュールの作成
 

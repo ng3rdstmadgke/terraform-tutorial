@@ -1,4 +1,4 @@
-Chapter5 CICD
+Chapter9 CICD
 ---
 [READMEに戻る](../README.md)
 
@@ -909,7 +909,7 @@ resource "aws_codepipeline" "this" {
 
 `terraform/modules/cicd/resources/buildspec.yml`
 
-```hcl
+```yml
 # buildspecの構文
 #   https://docs.aws.amazon.com/ja_jp/codebuild/latest/userguide/build-spec-ref.html#build-spec-ref-syntax
 #
@@ -1114,7 +1114,7 @@ git push codecommit main:${ENV_NAME}
 pushするとEventBridgeがCodePipelineをキックします。  
 CodeDeployまで進んだら、「詳細」をクリックしましょう。
 
-<img src="img/05/codepipeline_01.png" width="1000px">
+<img src="img/09/codepipeline_01.png" width="1000px">
 
 CodeDeployの画面に進むと、Blue/Greenデプロイの管理画面が表示されます。  
 デプロイのステータスがステップ2まで進むと、スタンバイ用のALBリスナー(8080)からデプロイ中のコンテナにアクセスすることができますので、ブラウザでアクセスしてみましょう。  
@@ -1125,13 +1125,13 @@ http://xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.ap-northeast-1.elb.amazonaws.co
 問題なくアクセスできるようであれば「トラフィックの再ルーティング」をクリックし、本番用のリスナー(80)がデプロイ中のコンテナに向くようになります。
 
 
-<img src="img/05/codedeploy_01.png" width="1000px">
+<img src="img/09/codedeploy_01.png" width="1000px">
 
 デプロイのステータスがステップ4まで進むと、本番用のリスナー(80)がデプロイ中のコンテナに向いた状態になります。
 「元のタスクセットの終了」をクリックすると、古いコンテナを終了させることができます。
 
-<img src="img/05/codedeploy_02.png" width="1000px">
+<img src="img/09/codedeploy_02.png" width="1000px">
 
 デプロイのステータスがステップ6まで完了したら、デプロイ完了です。
 
-<img src="img/05/codedeploy_03.png" width="1000px">
+<img src="img/09/codedeploy_03.png" width="1000px">
