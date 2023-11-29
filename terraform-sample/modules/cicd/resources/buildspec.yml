@@ -31,12 +31,15 @@ phases:
     commands:
       - echo Build started on `date`
       - echo Building the Docker image...
+      # イメージビルド
       - |
         docker build --rm \
           -f docker/app/Dockerfile \
           -t ${APP_IMAGE_URI}:latest \
           .
       - docker tag $APP_IMAGE_URI:latest $APP_IMAGE_URI:$IMAGE_TAG
+      # マイグレーション
+      - docker run --rm --env-file env/${STAGE}.env ${APP_IMAGE_URI}:latest alembic upgrade head
   post_build:
     commands:
       - echo Build completed on `date`
