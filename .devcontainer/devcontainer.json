@@ -34,7 +34,7 @@
    *
    */
   // コンテナが初めて起動した直後に実行するコマンド
-  "onCreateCommand": "ls -alF",
+  "onCreateCommand": "/bin/bash .devcontainer/on-create.sh",
   // devcontainerにアタッチした直後に実行するコマンド
   "postAttachCommand": "rm -f /home/vscode/.docker/config.json",  // NOTE: 初期配置のconfig.jsonが存在するとECRにログインできない
 
