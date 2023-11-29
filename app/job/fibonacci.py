@@ -14,10 +14,10 @@ class QueueBody(BaseModel):
     n: int
 
 @click.command(context_settings=CONTEXT_SETTINGS)
-@click.option("-b", "--queue_body", required=True, type=str)
-def main(queue_body):
-    print(f"queue_body: {queue_body}")
-    queue_body_obj = QueueBody.model_validate_json(queue_body)
+@click.option("-b", "--sqs_message_body", required=True, type=str)
+def main(sqs_message_body):
+    print(f"sqs_message_body: {sqs_message_body}")
+    queue_body_obj = QueueBody.model_validate_json(sqs_message_body)
     with SessionLocal() as session:
         aws_resource = AwsResource()
         job = session.query(Job).filter(Job.id == queue_body_obj.job_id).first()
@@ -25,7 +25,7 @@ def main(queue_body):
             aws_resource.send_message(
                 sub="fibonacciジョブの実行に失敗しました",
                 message=f"job_id={queue_body_obj.job_id} が見つかりません。",
-                obj=queue_body,
+                obj=sqs_message_body,
             )
             return
         try:
@@ -41,12 +41,12 @@ def main(queue_body):
             aws_resource.send_message(
                 sub="fibonacciジョブの実行に失敗しました",
                 message=str(e),
-                obj=queue_body,
+                obj=sqs_message_body,
             )
         finally:
             session.add(job)
             session.commit()
 
 if __name__ == "__main__":
-    #queue_body = json.dumps({"job_id": 2, "n": 10})
+    #sqs_message_body = json.dumps({"job_id": 2, "n": 10})
     main()

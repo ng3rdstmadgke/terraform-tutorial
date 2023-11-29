@@ -18,3 +18,13 @@ variable "memory" {
   type=string
   default="2048"
 }
+
+variable "schedule_expression" {}
+variable "sfn_input" {
+  type = map
+  default = {"message": "hello"}
+}
+
+locals {
+  job_name = "${var.app_name}-${var.stage}-${var.batch_name}-ScheduledJob"
+}

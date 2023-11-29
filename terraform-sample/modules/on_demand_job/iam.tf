@@ -2,7 +2,7 @@
  * ECSタスク実行ロール
  *******************************/
 resource "aws_iam_role" "ecs_task_execution_role" {
-  name = "${var.app_name}-${var.stage}-${var.batch_name}-EcsTaskExecutionRole"
+  name = "${var.app_name}-${var.stage}-${var.batch_name}-OnDemandJob-EcsTaskExecutionRole"
   assume_role_policy = data.aws_iam_policy_document.assume_ecs_task_exec_role_policy.json
 }
 
@@ -25,7 +25,7 @@ resource "aws_iam_role_policy_attachment" "attach_ecs_task_exec_role_policy" {
  * ECSタスクロール
  *******************************/
 resource "aws_iam_role" "ecs_task_role" {
-  name = "${var.app_name}-${var.stage}-${var.batch_name}-EcsTaskRole"
+  name = "${var.app_name}-${var.stage}-${var.batch_name}-OnDemandJob-EcsTaskRole"
   assume_role_policy = data.aws_iam_policy_document.assume_ecs_task_role_policy.json
 }
 
@@ -40,7 +40,7 @@ data "aws_iam_policy_document" "assume_ecs_task_role_policy" {
 }
 
 resource "aws_iam_policy" "ecs_task_role_policy" {
-  name = "${var.app_name}-${var.stage}-${var.batch_name}-EcsTaskRolePolicy"
+  name = "${var.app_name}-${var.stage}-${var.batch_name}-OnDemandJob-EcsTaskRolePolicy"
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -88,7 +88,7 @@ resource "aws_iam_role_policy_attachment" "attach_ecs_task_role_policy" {
  */
 
 resource "aws_iam_role" "batch_pipes_role" {
-  name = "${var.app_name}-${var.stage}-${var.batch_name}-PipesRole"
+  name = "${var.app_name}-${var.stage}-${var.batch_name}-OnDemandJob-PipesRole"
   assume_role_policy = jsonencode({
     "Version": "2012-10-17"
     "Statement": {
@@ -102,7 +102,7 @@ resource "aws_iam_role" "batch_pipes_role" {
 }
 
 resource "aws_iam_policy" "batch_pipes_source_policy" {
-  name = "${var.app_name}-${var.stage}-${var.batch_name}-PipesSourcePolicy"
+  name = "${var.app_name}-${var.stage}-${var.batch_name}-OnDemandJob-PipesSourcePolicy"
   policy = jsonencode({
     "Version": "2012-10-17",
     "Statement": [
@@ -127,7 +127,7 @@ resource "aws_iam_role_policy_attachment" "attach_source_policy" {
 }
 
 resource "aws_iam_policy" "batch_pipes_target_policy" {
-  name = "${var.app_name}-${var.stage}-${var.batch_name}-PipesTargetPolicy"
+  name = "${var.app_name}-${var.stage}-${var.batch_name}-OnDemandJob-PipesTargetPolicy"
   policy = jsonencode({
     "Version": "2012-10-17",
     "Statement": [
@@ -137,7 +137,7 @@ resource "aws_iam_policy" "batch_pipes_target_policy" {
           "states:StartExecution"
         ],
         "Resource": [
-          aws_sfn_state_machine.pipe_target.arn
+          aws_sfn_state_machine.on_demand_job.arn
         ]
       }
     ]
@@ -154,7 +154,7 @@ resource "aws_iam_role_policy_attachment" "attach_target_policy" {
  * StepFunctionsロール
  *******************************/
 resource "aws_iam_role" "batch_sfn_role" {
-  name = "${var.app_name}-${var.stage}-${var.batch_name}-BatchSfnRole"
+  name = "${var.app_name}-${var.stage}-${var.batch_name}-OnDemandJob-BatchSfnRole"
   assume_role_policy = jsonencode({
     "Version": "2012-10-17",
     "Statement": [
@@ -170,8 +170,8 @@ resource "aws_iam_role" "batch_sfn_role" {
 }
 
 # Batch実行権限
-resource "aws_iam_policy" "batch_job_management_full_access_policy" {
-  name = "${var.app_name}-${var.stage}-BatchJobManagementFullAccessPolicy"
+resource "aws_iam_policy" "batch_job_management_access_policy" {
+  name = "${var.app_name}-${var.stage}-${var.batch_name}-OnDemandJob-BatchJobManagementAccessPolicy"
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -201,9 +201,9 @@ resource "aws_iam_policy" "batch_job_management_full_access_policy" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "attach_batch_job_management_full_access_policy" {
+resource "aws_iam_role_policy_attachment" "attach_batch_job_management_access_policy" {
   role = aws_iam_role.batch_sfn_role.name
-  policy_arn = aws_iam_policy.batch_job_management_full_access_policy.arn
+  policy_arn = aws_iam_policy.batch_job_management_access_policy.arn
 }
 
 # lambda実行権限
@@ -214,7 +214,7 @@ resource "aws_iam_role_policy_attachment" "attach_invoke_lambda_policy" {
 
 # ログ保存用の権限
 resource "aws_iam_policy" "cloud_watch_logs_delivery_full_access_policy" {
-  name = "${var.app_name}-${var.stage}-${var.batch_name}-CloudWatchLogsDeliveryFullAccessPolicy"
+  name = "${var.app_name}-${var.stage}-${var.batch_name}-OnDemandJob-CloudWatchLogsDeliveryFullAccessPolicy"
   policy = jsonencode({
     "Version": "2012-10-17",
     "Statement": [
@@ -244,7 +244,7 @@ resource "aws_iam_role_policy_attachment" "attach_cloud_watch_logs_delivery_full
 
 # デフォルトで作成される権限
 resource "aws_iam_policy" "xray_access_policy" {
-  name = "${var.app_name}-${var.stage}-${var.batch_name}-XRayAccessPolicy"
+  name = "${var.app_name}-${var.stage}-${var.batch_name}-OnDemandJob-XRayAccessPolicy"
   policy = jsonencode({
     "Version": "2012-10-17",
     "Statement": [

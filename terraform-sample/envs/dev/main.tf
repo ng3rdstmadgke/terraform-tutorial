@@ -100,8 +100,8 @@ module "db" {
   instance_num        = 1
 }
 
-module "batch_base" {
-  source              = "../../modules/batch_base"
+module "job_base" {
+  source              = "../../modules/job_base"
   app_name            = local.app_name
   stage               = local.stage
   vpc_id              = var.vpc_id
@@ -115,8 +115,8 @@ module "batch_base" {
   }
 }
 
-module "batch_cmd_fibonacci" {
-  source              = "../../modules/batch_cmd"
+module "fibonacci_job" {
+  source              = "../../modules/on_demand_job"
   account_id          = local.account_id
   app_name            = local.app_name
   stage               = local.stage
@@ -128,19 +128,47 @@ module "batch_cmd_fibonacci" {
     "DB_SECRET_NAME": "/${local.app_name}/${local.stage}/db",
     "JOB_QUEUE_URL": "dummy"
   }
-  batch_job_queue_arn = module.batch_base.job_queue_arn
+  batch_job_queue_arn = module.job_base.job_queue_arn
   image_uri           = var.app_image_uri
   image_tag           = "latest"
   command             = [
     "python",
-    "/opt/app/batch_cmd/fibonacci.py",
+    "/opt/app/job/fibonacci.py",
     "-b",
-    "Ref::queue_input",  # SQSに送信されたキューのBody
+    "Ref::sqs_message_body",  # SQSに送信されたキューのBody
   ]
-  success_handler_arn = module.batch_base.success_handler.arn
-  error_handler_arn = module.batch_base.error_handler.arn
+  success_handler_arn = module.job_base.success_handler.arn
+  error_handler_arn = module.job_base.error_handler.arn
   vcpus               = "1"
   memory              = "2048"
+}
+
+module "crawler_job" {
+  source              = "../../modules/scheduled_job"
+  account_id          = local.account_id
+  app_name            = local.app_name
+  stage               = local.stage
+  batch_name          = "crawler"
+  env                 = {
+    "STAGE" : local.stage,
+    "SNS_ARN": module.base.sns_topic_arn,
+    "DB_NAME": local.stage,
+    "DB_SECRET_NAME": "/${local.app_name}/${local.stage}/db",
+    "JOB_QUEUE_URL": "dummy"
+  }
+  batch_job_queue_arn = module.job_base.job_queue_arn
+  image_uri           = var.app_image_uri
+  image_tag           = "latest"
+  command             = [
+    "python",
+    "/opt/app/job/crawler.py",
+  ]
+  success_handler_arn = module.job_base.success_handler.arn
+  error_handler_arn = module.job_base.error_handler.arn
+  vcpus               = "1"
+  memory              = "2048"
+  # https://docs.aws.amazon.com/ja_jp/scheduler/latest/UserGuide/schedule-types.html
+  schedule_expression = "rate(5 minutes)"  # 5分おき
 }
 
 module "app" {
@@ -154,13 +182,13 @@ module "app" {
   ingress_cidr_blocks = [local.vpc_cidr_block]
   app_alb_arn         = module.alb.app_alb.arn
   sns_topic_arn       = module.base.sns_topic_arn
-  job_queue_arn       = module.batch_cmd_fibonacci.queue_arn
+  job_queue_arn       = module.fibonacci_job.queue_arn
   env                 = {
     "STAGE" : local.stage,
     "SNS_ARN": module.base.sns_topic_arn,
     "DB_NAME": local.stage,
     "DB_SECRET_NAME": "/${local.app_name}/${local.stage}/db",
-    "JOB_QUEUE_URL": module.batch_cmd_fibonacci.queue_url,
+    "JOB_QUEUE_URL": module.fibonacci_job.queue_url,
   }
 }
 
@@ -173,7 +201,7 @@ STAGE=${local.stage}
 SNS_ARN=${module.base.sns_topic_arn}
 DB_NAME=${local.stage}
 DB_SECRET_NAME=/${local.app_name}/${local.stage}/db
-JOB_QUEUE_URL=${module.batch_cmd_fibonacci.queue_url}
+JOB_QUEUE_URL=${module.fibonacci_job.queue_url}
 
 EOF
 }

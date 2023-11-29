@@ -1,28 +1,8 @@
 /**
- * SQS (Pipeソース)
- * https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sqs_queue.html
- */
-resource "aws_sqs_queue" "pipe_source" {
-  name = "${var.app_name}-${var.stage}-${var.batch_name}-Queue"
-  # キューに送信されたメッセージがコンシューマに表示されるまでの時間 (秒)
-  delay_seconds = 0
-  # 最大メッセージサイズ (バイト)
-  max_message_size = 262144 # 256KiB
-  # メッセージ保持期間 (秒)
-  message_retention_seconds = 604800 # 7 days
-  # メッセージ受信待機時間 (秒)
-  receive_wait_time_seconds = 0
-  # 可視性タイムアウト (秒)
-  # コンシューマがこの期間内にメッセージを処理して削除できなかった場合、メッセージは再度キューに表示される。
-  visibility_timeout_seconds = 30
-  # NOTE: DLQ
-}
-
-/**
  * ジョブ定義
  */
 resource "aws_batch_job_definition" "batch_job_definition" {
-  name = "${var.app_name}-${var.stage}-${var.batch_name}-Batch"
+  name = local.job_name
   type = "container"
   platform_capabilities = [
     "FARGATE",
@@ -67,18 +47,18 @@ resource "aws_batch_job_definition" "batch_job_definition" {
  *   https://docs.aws.amazon.com/ja_jp/step-functions/latest/dg/connect-lambda.html
  */
 // ステートマシン用ロググループ
-resource "aws_cloudwatch_log_group" "report_job_log_group" {
-  name = "${var.app_name}/${var.stage}/${var.batch_name}"
+resource "aws_cloudwatch_log_group" "scheduled_job_log_group" {
+  name = "${var.app_name}/${var.stage}/scheduled/${var.batch_name}"
   retention_in_days = 365
 }
 
 // https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sfn_state_machine
-resource "aws_sfn_state_machine" "pipe_target" {
-  name = "${var.app_name}-${var.stage}-${var.batch_name}"
+resource "aws_sfn_state_machine" "scheduled_job" {
+  name = local.job_name
   role_arn = aws_iam_role.batch_sfn_role.arn
 
   logging_configuration {
-    log_destination = "${aws_cloudwatch_log_group.report_job_log_group.arn}:*"
+    log_destination = "${aws_cloudwatch_log_group.scheduled_job_log_group.arn}:*"
     include_execution_data = true
     level = "ALL"
   }
@@ -88,51 +68,70 @@ resource "aws_sfn_state_machine" "pipe_target" {
       "Comment": "A description of my state machine",
       "StartAt": "ExtractInputParameters",
       "States": {
+        // 入力パラメータの抽出
         "ExtractInputParameters": {
           "Type": "Pass",
           "Next": "BatchGroup",
           "Parameters":{
-            "Input.$" : "$"
+            "metadata": {
+              "app_name": var.app_name,
+              "stage": var.stage,
+              "batch_name": var.batch_name,
+              "job_name": local.job_name,
+              "command": var.command,
+              "vcpus": var.vcpus,
+              "memory": var.memory,
+              "image_uri": var.image_uri,
+              "image_tag": var.image_tag,
+              "env": var.env,
+            },
+            "input.$" : "$"
           },
+          // {"metadata": <メタデータ>, "input": <入力パラメータ>} 形式に変換
           "ResultPath": "$"
         },
+        // ジョブ実行
         "BatchGroup": {
           "Type": "Parallel",
           "Branches": [
             {
               "StartAt": "Batch",
               "States": {
+                // バッチ処理
                 "Batch": {
                   "Type": "Task",
                   "Resource": "arn:aws:states:::batch:submitJob.sync",
                   // https://docs.aws.amazon.com/step-functions/latest/dg/connect-batch.html
                   "Parameters": {
-                    "JobName": "${var.app_name}-${var.stage}-${var.batch_name}-Batch",
+                    "JobName": local.job_name,
                     "JobDefinition": "${aws_batch_job_definition.batch_job_definition.arn}",
                     "JobQueue": "${var.batch_job_queue_arn}",
                     // Parameters: https://docs.aws.amazon.com/batch/latest/APIReference/API_SubmitJob.html#Batch-SubmitJob-request-parameters
                     "Parameters": {
-                      "queue_input.$": "$.Input[0].body"
+                      "sfn_input.$": "$.input"
                     },
                     // ContainerOverrides: https://docs.aws.amazon.com/batch/latest/APIReference/API_ContainerOverrides.html
                     "ContainerOverrides": {
                       "Command": var.command
                     }
                   },
+                  // {"metadata": <メタデータ>, "input": <入力パラメータ>, "batch": <バッチ処理の結果>} 形式に変換
                   "ResultPath": "$.batch",
                   "Next": "OnSuccess"
                 },
+                // 成功ハンドラ
                 "OnSuccess": {
                   "Type": "Task",
                   "Resource": "arn:aws:states:::lambda:invoke",
-                  "ResultPath": "$.Result.successHandler",
                   "Parameters": {
                     "Payload": {
-                      "input.$": "$",
-                      "context.$": "$$"
+                      "state.$": "$",  // {"metadata": <メタデータ>, "input": <入力パラメータ>, "batch": <バッチ処理の結果>}
+                      "context.$": "$$"  // すべてのコンテキストを渡す
                     },
                     "FunctionName": "${var.success_handler_arn}:$LATEST"
                   },
+                  // {"metadata": <メタデータ>, "input": <入力パラメータ>, "batch": <バッチ処理の結果>, "success_handler": <成功ハンドラの結果>} 形式に変換
+                  "ResultPath": "$.success_handler",
                   "End": true
                 }
               }
@@ -143,23 +142,26 @@ resource "aws_sfn_state_machine" "pipe_target" {
               "ErrorEquals": [
                 "States.ALL"
               ],
+              // {"metadata": <メタデータ>, "input": <入力パラメータ>, "error": <エラー>, ...} 形式に変換
               "ResultPath": "$.error",
               "Next": "ErrorHandler"
             }
           ],
           "End": true
         },
+        // エラーハンドラ
         "ErrorHandler": {
           "Type": "Task",
           "Resource": "arn:aws:states:::lambda:invoke",
-          "ResultPath": "$.Result.errorHandler",
           "Parameters": {
             "Payload": {
-              "input.$": "$",
-              "context.$": "$$"
+              "state.$": "$",  // すべての入力パラメータを渡す {"metadata": <メタデータ>, "input": <入力パラメータ>, "error": <エラー>, ...}
+              "context.$": "$$"  // すべてのコンテキストを渡す
             },
             "FunctionName": "${var.error_handler_arn}:$LATEST"
           },
+          // {"metadata": <メタデータ>, "input": <入力パラメータ>, "error": <エラー>, "error_handler": <エラーハンドラの結果>, ...} 形式に変換
+          "ResultPath": "$.error_handler",
           "Retry": [
             {
               "ErrorEquals": [
@@ -180,31 +182,27 @@ resource "aws_sfn_state_machine" "pipe_target" {
 }
 
 /**
- * EventBridge Pipes
+ * EventBridge scheduler
  */
 
-# https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/pipes_pipe
-resource "aws_pipes_pipe" "batch_pipe" {
-  name       = "${var.app_name}-${var.stage}-${var.batch_name}-BatchPipe"
-  role_arn   = aws_iam_role.batch_pipes_role.arn
-  source     = aws_sqs_queue.pipe_source.arn
-  target     = aws_sfn_state_machine.pipe_target.arn
+resource "aws_scheduler_schedule" "this" {
+  name       = "${local.job_name}-Scheduler"
+  group_name = "default"
 
-  source_parameters {
-    sqs_queue_parameters {
-      batch_size = 1
-    }
+  flexible_time_window {
+    mode = "OFF"
   }
 
-  target_parameters {
-    step_function_state_machine_parameters {
-      invocation_type = "FIRE_AND_FORGET"
-    }
+  // AWS - EventBridge - スケジュールタイプ: https://docs.aws.amazon.com/ja_jp/scheduler/latest/UserGuide/schedule-types.html
+  schedule_expression = var.schedule_expression
+  schedule_expression_timezone = "Asia/Tokyo"
+
+  target {
+    arn      = aws_sfn_state_machine.scheduled_job.arn
+    role_arn = aws_iam_role.batch_scheduler_role.arn
+    input = jsonencode(var.sfn_input)
   }
-
-
   depends_on = [
-    aws_iam_role_policy_attachment.attach_source_policy,
     aws_iam_role_policy_attachment.attach_target_policy,
   ]
 }
