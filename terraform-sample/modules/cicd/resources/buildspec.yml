@@ -27,6 +27,11 @@ phases:
       - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - IMAGE_TAG=${COMMIT_HASH:=latest}
       - echo $IMAGE_TAG
+      # AWSの認証情報を取得
+      - AWS_CRED=$(curl "http://169.254.170.2${AWS_CONTAINER_CREDENTIALS_RELATIVE_URI}")
+      - AWS_ACCESS_KEY_ID=`echo ${AWS_CRED} | jq -r .AccessKeyId`
+      - AWS_SECRET_ACCESS_KEY=`echo ${AWS_CRED} | jq -r .SecretAccessKey`
+      - AWS_SESSION_TOKEN=`echo ${AWS_CRED} | jq -r .Token`
   build:
     commands:
       - echo Build started on `date`
@@ -39,7 +44,14 @@ phases:
           .
       - docker tag $APP_IMAGE_URI:latest $APP_IMAGE_URI:$IMAGE_TAG
       # マイグレーション
-      - docker run --rm --env-file env/${STAGE}.env ${APP_IMAGE_URI}:latest alembic upgrade head
+      - |
+        docker run --rm \
+          --env-file env/${STAGE}.env \
+          -e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
+          -e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
+          -e AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN} \
+          ${APP_IMAGE_URI}:latest \
+          alembic upgrade head
   post_build:
     commands:
       - echo Build completed on `date`

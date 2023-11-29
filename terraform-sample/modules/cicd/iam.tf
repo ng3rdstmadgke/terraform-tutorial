@@ -219,6 +219,16 @@ resource "aws_iam_policy" "codebuild_for_app_policy" {
       {
         "Effect" : "Allow",
         "Action" : [
+          "secretsmanager:GetSecretValue",
+          "secretsmanager:DescribeSecret"
+        ],
+        "Resource" : [
+          "arn:aws:secretsmanager:ap-northeast-1:${var.account_id}:secret:/${var.app_name}/*"
+        ]
+      },
+      {
+        "Effect" : "Allow",
+        "Action" : [
           "ecs:Describe*"
         ],
         "Resource" : [
