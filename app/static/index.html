@@ -53,6 +53,7 @@
           tdStatus.textContent = e.status
           tr.appendChild(tdStatus)
           let tdResult = document.createElement('td')
+          tdResult.className = "result-cell"
           tdResult.textContent = e.result
           tr.appendChild(tdResult)
           let tdCreated = document.createElement('td')
@@ -67,5 +68,11 @@
         console.log(error.message)
       })
     </script>
+    <style>
+      .result-cell {
+        max-width: 150px;
+        overflow: hidden;
+      }
+    </style>
   </body>
 </html>
