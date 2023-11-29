@@ -54,8 +54,14 @@ def fibonacci_jobs_create(
     session.add(job)
     session.commit()
     session.refresh(job)
-    aws_resource = AwsResource()
-    message_id = aws_resource.send_fibonacci_job(job.id, data.n)
+    try:
+        aws_resource = AwsResource()
+        message_id = aws_resource.send_fibonacci_job(job.id, data.n)
+    except Exception as e:
+        logger.error(e)
+        job.status = JobStatus.FAILED
+        session.commit()
+        raise e
     return {"job_id": job.id, "message_id": message_id}
 
 # html=True : パスの末尾が "/" の時に自動的に index.html をロードする
