@@ -1,5 +1,11 @@
 # Terraformチュートリアル
 
+TerraformチュートリアルではECSを使った基本的な構成のアプリケーションを構築します。
+
+<img src="docs/img/00/drawio/architecture.drawio.png" width="900px">
+
+
+
 - [Chapter0 - 前準備](docs/chapter_00.md)
 - [Chapter1 - Terraform入門](docs/chapter_01.md)
 - [Chapter2 - データベース](docs/chapter_02.md)
