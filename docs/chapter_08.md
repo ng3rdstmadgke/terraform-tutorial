@@ -18,7 +18,9 @@ mkdir -p ${CONTAINER_PROJECT_ROOT}/terraform/modules/monitoring
 touch ${CONTAINER_PROJECT_ROOT}/terraform/modules/monitoring/{main.tf,variables.tf,outputs.tf,iam.tf}
 ```
 
-# ■ 3. 入力値・出力値の定義
+# ■ 3. monitoringモジュールの作成
+
+## 1. 入力値・出力値の定義
 
 `terraform/modules/monitoring/variables.tf`
 
@@ -52,9 +54,9 @@ variable "avg_request_count_per_target" {
 
 ```
 
-# ■ 4. リソース定義
+## 2. リソース定義
 
-## ロールの定義
+### ロールの定義
 
 `terraform/modules/monitoring/iam.tf`
 
@@ -101,7 +103,7 @@ resource "aws_iam_policy" "ecs_autoscaling_policy" {
 }
 ```
 
-## オートスケーリングリソース定義
+### オートスケーリングリソース定義
 
 ターゲット当たりの分間リクエスト数を300(`var.avg_request_count_per_target`)程度に保つオートスケーリングの設定を定義します。
 
@@ -226,7 +228,7 @@ resource "aws_appautoscaling_policy" "ecs_1_policy" {
 }
 ```
 
-# ■ 5. 定義したモジュールをエントリーポイントから参照する
+## ■ 4. 定義したモジュールをエントリーポイントから参照する
 
 `terraform/envs/${STAGE}/main.tf`
 
@@ -244,7 +246,7 @@ module "monitoring" {  // < 追加 >
 }
 ```
 
-# ■ 6. デプロイ
+# ■ 5. デプロイ
 
 ```bash
 cd ${CONTAINER_PROJECT_ROOT}/terraform/envs/${STAGE}
@@ -259,7 +261,7 @@ terraform plan
 terraform apply -auto-approve
 ```
 
-# ■ 7. オートスケールを試してみましょう
+# ■ 6. オートスケールを試してみましょう
 
 ALBに対して大量のリクエストを送信してみる
 

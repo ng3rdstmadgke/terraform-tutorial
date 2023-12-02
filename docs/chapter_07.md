@@ -805,7 +805,7 @@ MySQL [mido]> exit
 exit
 ```
 
-# ■ ブラウザでアクセス
+# ■ 7. ブラウザでアクセス
 
 デプロイが完了したら `terraform output` コマンドで出力される `alb_host_name` にブラウザでアクセスしてみましょう
 

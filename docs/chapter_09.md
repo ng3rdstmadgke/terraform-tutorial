@@ -19,7 +19,9 @@ touch ${CONTAINER_PROJECT_ROOT}/terraform/modules/cicd/{main.tf,variables.tf,out
 touch ${CONTAINER_PROJECT_ROOT}/terraform/modules/cicd/resources/buildspec.yml
 ```
 
-# ■ 3. 入力値・出力値の定義
+# ■ 3. cicdモジュールの作成
+
+## 1. 入力値・出力値の定義
 
 `terraform/modules/cicd/variables.tf`
 
@@ -66,9 +68,9 @@ variable "repository_name" {}
 variable "ecs_task_family" {}
 ```
 
-# ■ 4. リソース定義
+## 2. リソース定義
 
-## ロールの定義
+### ロールの定義
 
 `terraform/modules/cicd/iam.tf`
 
@@ -568,7 +570,7 @@ resource "aws_iam_role_policy_attachment" "attach_event_bridge_codepipeline_poli
 }
 ```
 
-## CodeBuildの定義
+### CodeBuildの定義
 
 CodeBuildでは、アプリで利用するdockerイメージをビルドして、ECSにpushするまでを行います。
 
@@ -682,7 +684,7 @@ resource "aws_codebuild_project" "this" {
 }
 ```
 
-## CodeDeployの定義
+### CodeDeployの定義
 
 CodeDeployでは、CodeBuildでpushされたdockerイメージとタスク定義を利用して新しいECSタスクを立ち上げ、Blue/Greenデプロイを実施します。
 
@@ -776,7 +778,7 @@ resource "aws_codedeploy_deployment_group" "this" {
 }
 ```
 
-## CodePipelineの定義
+### CodePipelineの定義
 
 CodePipelineには CodeCommitの変更検知 ~ CodeBuild起動 ~ CodeDeployによるBlue/Greenデプロイといった一連の処理をまとめて定義します。
 
@@ -918,6 +920,8 @@ resource "aws_codepipeline" "this" {
 }
 ```
 
+### buildspec.ymlの定義
+
 `terraform/modules/cicd/resources/buildspec.yml`
 
 ```yml
@@ -1001,7 +1005,7 @@ artifacts:
     - appspec.yaml
 ```
 
-# ■ 5. 定義したモジュールをエントリーポイントから参照する
+# ■ 4. 定義したモジュールをエントリーポイントから参照する
 
 buildspec.ymlの出力アーティファクトである appspec.yml と taskdef.json を生成するリソースを定義します。  
 terraformでこれらのファイルを生成することにより、「イメージは最新だけど、古いタスク定義でデプロイされてしまった」みたいな事故を防ぐことができます。
@@ -1082,7 +1086,7 @@ EOF
 }
 ```
 
-# ■ 6. デプロイ
+# ■ 5. デプロイ
 
 ```bash
 cd ${CONTAINER_PROJECT_ROOT}/terraform/envs/${STAGE}
@@ -1097,7 +1101,7 @@ terraform plan
 terraform apply -auto-approve
 ```
 
-# ■ 7. CodePipelineによるアプリのデプロイ
+# ■ 6. CodePipelineによるアプリのデプロイ
 
 `terraform apply` を実施すると、 `tfexports/${STAGE}` 配下に `appspec.yml` , `taskdef.json` といったCodeDeployで利用されるファイルが生成されます。  
 このファイルをcommitし、EventBridgeで監視しているブランチにpushします。

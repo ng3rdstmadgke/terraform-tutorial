@@ -83,7 +83,7 @@ locals {
 
 ## 3. リソース定義
 
-ロールの定義
+### ロールの定義
 
 `terraform/modules/scheduled_job/iam.tf`
 
@@ -335,6 +335,7 @@ resource "aws_iam_role_policy_attachment" "attach_xray_access_policy" {
 
 ```
 
+### ジョブリソースの定義
 
 StepFunctionsは下記のような定義で作成します。
 
