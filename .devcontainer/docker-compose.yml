@@ -1,20 +1,25 @@
 version: '3.2'
 services:
   main:
+    hostname: main.local
     build:
       context: ../
       dockerfile: docker/devcontainer/Dockerfile
     volumes:  # docker-compose.yml があるディレクトリからの相対パスで指定する
-      - ..:/workspace:cached
+      - ..:/terraform-tutorial:cached
       - ~/.aws:/home/vscode/.aws:cached
       - ~/.ssh:/home/vscode/.ssh:cached
+      - ~/.docker:/home/vscode/.docker:cached
     command: sleep infinity
     networks:
       br-terraform-tutorial:
         ipv4_address: 192.168.44.10
 
   localstack:
-    image: localstack/localstack:latest
+    hostname: localstack.local
+    build:
+      context: ../
+      dockerfile: docker/localstack/Dockerfile
     restart: unless-stopped
     env_file: .env
     environment:
@@ -22,13 +27,14 @@ services:
       - DOCKER_HOST=unix:///var/run/docker.sock
     volumes:
       # LocalStack - init-fooks: https://docs.localstack.cloud/references/init-hooks/
-      - ./localstack:/etc/localstack/init/ready.d
+      - ../docker/localstack/init:/etc/localstack/init
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       br-terraform-tutorial:
         ipv4_address: 192.168.44.20
 
   mysql:
+    hostname: mysql.local
     build:
       context: ../
       dockerfile: docker/mysql/Dockerfile

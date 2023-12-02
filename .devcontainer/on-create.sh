@@ -9,4 +9,8 @@ pwd
 
 PROJECT_ROOT=$(cd $(dirname $0)/..; pwd)
 cd $PROJECT_ROOT
-pip install -r .devcontainer/requirements-dev.txt
+
+cat <<EOF > ~/.bashrc
+
+source ${CONTAINER_PROJECT_ROOT}/.devcontainer/.bashrc_private
+EOF
