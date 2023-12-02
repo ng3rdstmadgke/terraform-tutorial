@@ -16,8 +16,3 @@ TerraformチュートリアルではECSを使った基本的な構成のアプ�
 - [Chapter7 - ECS](docs/chapter_07.md)
 - [Chapter8 - オートスケーリング](docs/chapter_08.md)
 - [Chapter9 - CICD](docs/chapter_09.md)
-
-
-# TODO
-
-- ドキュメント修正
