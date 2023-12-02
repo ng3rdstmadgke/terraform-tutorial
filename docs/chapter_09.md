@@ -92,13 +92,13 @@ resource "aws_iam_role" "codebuild_service_role" {
     ]
   })
   lifecycle {
-    # NOTE: CICDアーティファクト用バケットのバケットポリシーのConditionにRoleIdを利用しているので削除してはいけない
-    #prevent_destroy = true
+    // NOTE: CICDアーティファクト用バケットのバケットポリシーのConditionにRoleIdを利用しているので削除してはいけない
+    // prevent_destroy = true
   }
 }
 
-# CodeBuildサービスロールの作成
-# https://docs.aws.amazon.com/ja_jp/codebuild/latest/userguide/setting-up.html#setting-up-service-role
+// CodeBuildサービスロールの作成
+// https://docs.aws.amazon.com/ja_jp/codebuild/latest/userguide/setting-up.html#setting-up-service-role
 resource "aws_iam_policy" "codebuild_service_policy" {
   name = "${var.app_name}-${var.stage}-CodeBuildServicePolicy"
   policy = jsonencode({
@@ -187,8 +187,8 @@ resource "aws_iam_role_policy_attachment" "attach_codebuild_service_policy" {
   policy_arn = aws_iam_policy.codebuild_service_policy.arn
 }
 
-# VPC内でCodeBuildを実行するためのポリシー
-# https://docs.aws.amazon.com/ja_jp/codebuild/latest/userguide/auth-and-access-control-iam-identity-based-access-control.html#customer-managed-policies-example-create-vpc-network-interface
+// VPC内でCodeBuildを実行するためのポリシー
+// https://docs.aws.amazon.com/ja_jp/codebuild/latest/userguide/auth-and-access-control-iam-identity-based-access-control.html#customer-managed-policies-example-create-vpc-network-interface
 resource "aws_iam_policy" "codebuild_for_vpc_policy" {
   name = "${var.app_name}-${var.stage}-CodeBuildForVpcPolicy"
   policy = jsonencode({
@@ -233,8 +233,8 @@ resource "aws_iam_role_policy_attachment" "attach_codebuild_for_vpc_policy" {
   policy_arn = aws_iam_policy.codebuild_for_vpc_policy.arn
 }
 
-# セッションマネージャーでビルド中のコンテナに接続するためのポリシー
-# https://docs.aws.amazon.com/ja_jp/codebuild/latest/userguide/session-manager.html
+// セッションマネージャーでビルド中のコンテナに接続するためのポリシー
+// https://docs.aws.amazon.com/ja_jp/codebuild/latest/userguide/session-manager.html
 resource "aws_iam_policy" "codebuild_for_ssm_policy" {
   name = "${var.app_name}-${var.stage}-CodeBuildForSsmPolicy"
   policy = jsonencode({
@@ -273,7 +273,7 @@ resource "aws_iam_role_policy_attachment" "attach_codebuild_for_ssm_policy" {
 }
 
 
-# そのほか必用なポリシー
+// そのほか必用なポリシー
 resource "aws_iam_policy" "codebuild_for_app_policy" {
   name = "${var.app_name}-${var.stage}-CodeBuildForAppPolicy"
   policy = jsonencode({
@@ -289,6 +289,16 @@ resource "aws_iam_policy" "codebuild_for_app_policy" {
         ],
         "Resource" : [
           "*"
+        ]
+      },
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "secretsmanager:GetSecretValue",
+          "secretsmanager:DescribeSecret"
+        ],
+        "Resource" : [
+          "arn:aws:secretsmanager:ap-northeast-1:${var.account_id}:secret:/${var.app_name}/*"
         ]
       },
       {
@@ -327,8 +337,8 @@ resource "aws_iam_role" "codedeploy_service_role" {
     ]
   })
   lifecycle {
-    # NOTE: CICDアーティファクト用バケットのバケットポリシーのConditionにRoleIdを利用しているので削除してはいけない
-    #prevent_destroy = true
+    // NOTE: CICDアーティファクト用バケットのバケットポリシーのConditionにRoleIdを利用しているので削除してはいけない
+    // prevent_destroy = true
   }
 }
 
@@ -356,8 +366,8 @@ resource "aws_iam_role" "codepipeline_service_role" {
     ]
   })
   lifecycle {
-    # NOTE: CICDアーティファクト用バケットのバケットポリシーのConditionにRoleIdを利用しているので削除してはいけない
-    #prevent_destroy = true
+    // NOTE: CICDアーティファクト用バケットのバケットポリシーのConditionにRoleIdを利用しているので削除してはいけない
+    // prevent_destroy = true
   }
 }
 
@@ -940,16 +950,31 @@ phases:
       - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - IMAGE_TAG=${COMMIT_HASH:=latest}
       - echo $IMAGE_TAG
+      # AWSの認証情報を取得
+      - AWS_CRED=$(curl "http://169.254.170.2${AWS_CONTAINER_CREDENTIALS_RELATIVE_URI}")
+      - AWS_ACCESS_KEY_ID=`echo ${AWS_CRED} | jq -r .AccessKeyId`
+      - AWS_SECRET_ACCESS_KEY=`echo ${AWS_CRED} | jq -r .SecretAccessKey`
+      - AWS_SESSION_TOKEN=`echo ${AWS_CRED} | jq -r .Token`
   build:
     commands:
       - echo Build started on `date`
       - echo Building the Docker image...
+      # イメージビルド
       - |
         docker build --rm \
           -f docker/app/Dockerfile \
           -t ${APP_IMAGE_URI}:latest \
           .
       - docker tag $APP_IMAGE_URI:latest $APP_IMAGE_URI:$IMAGE_TAG
+      # マイグレーション
+      - |
+        docker run --rm \
+          --env-file env/${STAGE}.env \
+          -e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
+          -e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
+          -e AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN} \
+          ${APP_IMAGE_URI}:latest \
+          alembic upgrade head
   post_build:
     commands:
       - echo Build completed on `date`
@@ -986,30 +1011,7 @@ terraformでこれらのファイルを生成することにより、「イメ�
 ```hcl
 // ... 略 ...
 
-// 変数定義
-variable "vpc_id" { type = string }
-variable "alb_subnets" { type = list(string) }
-variable "subnets" { type = list(string) }
-variable "app_image_uri" { type = string }
-variable "cicd_artifact_bucket" { type = string }  // 追加
-
-// ローカル変数を定義
-locals {
-  aws_region      = data.aws_region.current.name
-  account_id      = data.aws_caller_identity.self.account_id
-  app_name        = replace(lower("terraformtutorial"), "-", "")
-  stage           = "mido"
-  vpc_cidr_block  = "10.53.0.0/16"
-  env = {
-    "APP_NAME" : local.app_name,
-    "STAGE" : local.stage,
-  }
-  repository_name = "xxxxxxxxxxxxxxxxxx"  // 追加
-}
-
-// ... 略 ...
-
-module "cicd" { // 追加
+module "cicd" {
   source                = "../../modules/cicd"
   app_name              = local.app_name
   stage                 = local.stage
@@ -1030,18 +1032,19 @@ module "cicd" { // 追加
 }
 
 resource "null_resource" "make_dir" {
-  # https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource
+  // https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource
   triggers = {
     always_run = timestamp()
   }
+  // local-exec: https://developer.hashicorp.com/terraform/language/resources/provisioners/local-exec
   provisioner "local-exec" {
     command = "mkdir -p ../../../tfexports/${local.stage}"
   }
 }
 
-# appspec.ymlを作成
+// appspec.ymlを作成
 resource "local_file" "appspec_yml" {
-  # https://registry.terraform.io/providers/hashicorp/local/latest/docs/resources/file
+  // https://registry.terraform.io/providers/hashicorp/local/latest/docs/resources/file
   filename = "../../../tfexports/${local.stage}/appspec.yaml"
   content  = <<EOF
 version: 0.0
@@ -1059,9 +1062,9 @@ EOF
   depends_on = [null_resource.make_dir]
 }
 
-# taskdef.jsonを作成
+// taskdef.jsonを作成
 resource "null_resource" "run_script" {
-  # https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource
+  // https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource
   triggers = {
     always_run = timestamp()
   }
@@ -1077,13 +1080,6 @@ EOF
   }
   depends_on = [null_resource.make_dir]
 }
-```
-
-`terraform/envs/${STAGE}/environment.auto.tfvars`
-
-```hcl
-// CodePipeline用アーティファクト保存バケット
-cicd_artifact_bucket = "xxxxxxxxxxxxxxx"
 ```
 
 # ■ 6. デプロイ

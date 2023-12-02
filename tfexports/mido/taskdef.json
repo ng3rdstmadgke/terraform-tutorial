@@ -1,5 +1,5 @@
 {
-  "taskDefinitionArn": "arn:aws:ecs:ap-northeast-1:674582907715:task-definition/terraformtutorial-mido-app:1",
+  "taskDefinitionArn": "arn:aws:ecs:ap-northeast-1:674582907715:task-definition/terraformtutorial-mido-app:4",
   "containerDefinitions": [
     {
       "name": "app",
@@ -19,8 +19,20 @@
       ],
       "environment": [
         {
-          "name": "APP_NAME",
-          "value": "terraformtutorial"
+          "name": "JOB_QUEUE_URL",
+          "value": "https://sqs.ap-northeast-1.amazonaws.com/674582907715/terraformtutorial-mido-fibonacci-OnDemandJob-Queue"
+        },
+        {
+          "name": "DB_NAME",
+          "value": "mido"
+        },
+        {
+          "name": "SNS_ARN",
+          "value": "arn:aws:sns:ap-northeast-1:674582907715:terraformtutorial-mido-topic"
+        },
+        {
+          "name": "DB_SECRET_NAME",
+          "value": "/terraformtutorial/mido/db"
         },
         {
           "name": "STAGE",
@@ -41,7 +53,7 @@
       "healthCheck": {
         "command": [
           "CMD-SHELL",
-          "curl -H 'User-Agent: Docker-HealthChecker' -f 'http://localhost/healthcheck' || exit 1"
+          "curl -H 'User-Agent: Docker-HealthChecker' -f 'http://localhost/api/healthcheck/' || exit 1"
         ],
         "interval": 15,
         "timeout": 5,
@@ -54,7 +66,7 @@
   "taskRoleArn": "arn:aws:iam::674582907715:role/terraformtutorial-mido-EcsTaskRole",
   "executionRoleArn": "arn:aws:iam::674582907715:role/terraformtutorial-mido-EcsTaskExecutionRole",
   "networkMode": "awsvpc",
-  "revision": 1,
+  "revision": 4,
   "volumes": [],
   "status": "ACTIVE",
   "requiresAttributes": [
@@ -109,7 +121,7 @@
   ],
   "cpu": "512",
   "memory": "1024",
-  "registeredAt": "2023-11-05T09:10:43.615000+00:00",
+  "registeredAt": "2023-12-03T01:09:18.867000+09:00",
   "registeredBy": "arn:aws:iam::674582907715:user/admin-cli",
   "ephemeralStorage": {
     "sizeInGiB": 32
