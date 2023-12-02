@@ -6,16 +6,17 @@ Chapter9 CICD
 
 この章ではECSのオートスケーリング機能を作成します。
 
-<img src="img/05/drawio/architecture.drawio.png" width="900px">
+<img src="img/09/drawio/architecture.drawio.png" width="900px">
 
 # ■ 2. モジュールの作成
 
 ECSリソースを定義する `cicd` モジュールを定義します。
 
 ```bash
-mkdir -p terraform terraform/modules/cic/resourcesd
-(cd terraform/modules/cicd; touch main.tf variables.tf outputs.tf iam.tf)
-(cd terraform/modules/cicd/resources; touch buildspec.yml)
+ENV_NAME="your_name"
+mkdir -p ${CONTAINER_PROJECT_ROOT}/terraform/modules/cicd/resources
+touch ${CONTAINER_PROJECT_ROOT}/terraform/modules/cicd/{main.tf,variables.tf,outputs.tf,iam.tf}
+touch ${CONTAINER_PROJECT_ROOT}/terraform/modules/cicd/resources/buildspec.yml
 ```
 
 # ■ 3. 入力値・出力値の定義

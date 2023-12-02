@@ -13,8 +13,9 @@ Chapter8 オートスケーリング
 ECSリソースを定義する `monitoring` モジュールを定義します。
 
 ```bash
-mkdir -p terraform terraform/modules/monitoring
-(cd terraform/modules/monitoring; touch main.tf variables.tf outputs.tf iam.tf)
+ENV_NAME="your_name"
+mkdir -p ${CONTAINER_PROJECT_ROOT}/terraform/modules/monitoring
+touch ${CONTAINER_PROJECT_ROOT}/terraform/modules/monitoring/{main.tf,variables.tf,outputs.tf,iam.tf}
 ```
 
 # ■ 3. 入力値・出力値の定義

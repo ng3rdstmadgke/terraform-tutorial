@@ -13,8 +13,9 @@ Chapter7 ECS
 ECSリソースを定義する `app` モジュールを定義します。
 
 ```bash
-mkdir -p terraform terraform/modules/app
-(cd terraform/modules/app; touch main.tf variables.tf outputs.tf iam.tf)
+ENV_NAME="your_name"
+mkdir -p ${CONTAINER_PROJECT_ROOT}/terraform/modules/app
+touch ${CONTAINER_PROJECT_ROOT}/terraform/modules/app/{main.tf,variables.tf,outputs.tf,iam.tf}
 ```
 
 # ■ 3. 入力値・出力値の定義
