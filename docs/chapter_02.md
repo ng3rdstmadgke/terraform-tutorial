@@ -8,16 +8,19 @@ Chapter2 データベース
 
 <img src="img/02/drawio/architecture.drawio.png" width="900px">
 
-# ■ 2. モジュールの作成
+# ■ 2. dbモジュールの作成
 
-ECSリソースを定義する `db` モジュールを定義します。
+## 1. ファイル作成
+
+`db` モジュールを作成します。
 
 ```bash
-mkdir -p terraform terraform/modules/db
-(cd terraform/modules/db; touch main.tf variables.tf outputs.tf iam.tf)
+ENV_NAME="your_name"
+mkdir -p ${CONTAINER_PROJECT_ROOT}/terraform/modules/db
+touch ${CONTAINER_PROJECT_ROOT}/terraform/modules/db/{main.tf,variables.tf,outputs.tf,iam.tf}
 ```
 
-# ■ 3. 入力値・出力値の定義
+## 2. 入力値・出力値の定義
 
 `terraform/modules/db/variables.tf`
 
@@ -61,15 +64,16 @@ locals {
 `terraform/modules/db/variables.tf`
 
 ```hcl
-output db_secret_manager_arn {
+output db_secrets_manager_arn {
   value = aws_secretsmanager_secret.aurora_serverless_mysql80.arn
 }
 ```
 
-# ■ 4. リソース定義
+## 3. リソース定義
 
 Aurora Serverless v2 で MySQL8.0 互換のDBクラスタを作成します。
 
+`terraform/modules/db/main.tf`
 
 ```hcl
 /**
@@ -246,40 +250,37 @@ resource "aws_secretsmanager_secret_version" "aurora_serverless_mysql80" {
 
 ```
 
-# ■ 5. 定義したモジュールをエントリーポイントから参照する
+# ■ 3. 定義したモジュールをエントリーポイントから参照
+
+モジュールに定義したリソースはエントリーポイント ( `terraform/envs/${ENV_NAME}/main.tf` )から、関数のように呼び出すことでデプロイできます。
 
 `terraform/envs/${ENV_NAME}/main.tf`
 
 ```hcl
 // ... 略 ...
 
-// 変数定義
-variable "vpc_id" { type = string }
-variable "alb_subnets" { type = list(string) }
-variable "subnets" { type = list(string) }
-variable "app_image_uri" { type = string }
-variable "cicd_artifact_bucket" { type = string }
-variable "db_user" { type = string }  // 追加
-variable "db_password" { type = string }  // 追加
+// ローカル変数を定義
+locals {  // TODO: 追加
+  aws_region      = data.aws_region.current.name
+  account_id      = data.aws_caller_identity.self.account_id
+  app_name        = replace(lower("terraformtutorial"), "-", "")
+  stage           = "ステージ名"  // NOTE: ENV_NAMEに指定した名前
+  vpc_cidr_block  = "xxx.xxx.xxx.xxx/16"  // NOTE: VPCのCIDRブロック
+  repository_name = "xxxxxxxxxxxx"  // NOTE: CodeCommitに作成したリポジトリ名
+}
 
-// ... 略 ...
+// 変数定義
+variable "vpc_id" { type = string }  // TODO: 追加
+variable "subnets" { type = list(string) }  // TODO: 追加
+variable "db_user" { type = string }  // TODO: 追加
+variable "db_password" { type = string }  // TODO: 追加
 
 // 出力
-output "alb_host_name" {
-  value = module.alb.app_alb.dns_name
+output db_secrets_manager_arn {  // TODO: 追加
+  value = module.db.db_secrets_manager_arn
 }
 
-output "task_definition" {
-  value = "${module.app.ecs_task_family}:${module.app.ecs_task_revision}"
-}
-
-output db_secret_manager_arn {  // 追加
-  value = module.db.db_secret_manager_arn
-}
-
-// ... 略 ...
-
-module "db" {  // 追加
+module "db" {  // TODO: 追加
   source              = "../../modules/db"
   app_name            = local.app_name
   stage               = local.stage
@@ -293,6 +294,13 @@ module "db" {  // 追加
 }
 ```
 
+`variable` で定義した変数は terraform 実行時に指定する必要がありますが、毎回オプションとして指定するのは大変+ミスが起こるので、 `environment.auto.tfvars` というファイルを作成します。  
+※ 末尾が `.auto.tfvars` のファイルが存在すると、ファイル内に定義された変数が自動的に `variable` にアサインされます。
+
+```bash
+touch ${CONTAINER_PROJECT_ROOT}/terraform/envs/${ENV_NAME}/environment.auto.tfvars
+```
+
 `terraform/envs/${ENV_NAME}/environment.auto.tfvars`
 
 ```hcl
@@ -303,10 +311,10 @@ db_user = "sysadmin"
 db_password = "sysadmin1234"
 ```
 
-# ■ 6. デプロイ
+# ■ 4. デプロイ
 
 ```bash
-cd terraform/envs/${ENV_NAME}
+cd ${CONTAINER_PROJECT_ROOT}/terraform/envs/${ENV_NAME}
 
 # 初期化
 terraform init
@@ -314,11 +322,15 @@ terraform init
 # デプロイ内容確認
 terraform plan
 
-# 作成
+# デプロイ
 terraform apply -auto-approve
 ```
 
-# ■ 7. DBログイン
+# ■ 5. DBログイン
+
+デプロイしたデータベースにログインしてみましょう。
+※ DBと同じVPC上で動作するEC2上で操作している場合のみ可能です。
+
 
 ```bash
 # DBの接続情報を取得
@@ -328,6 +340,7 @@ DB_HOST=$(echo $SECRET_VALUE | jq -r ".db_host")
 DB_USER=$(echo $SECRET_VALUE | jq -r ".db_user")
 DB_PASSWD=$(echo $SECRET_VALUE | jq -r ".db_password")
 
-# ログイン (EC2上で操作していない場合は接続できません)
+# ログイン
+echo MYSQL_PWD=$DB_PASSWD mysql -u $DB_USER -h $DB_HOST
 MYSQL_PWD=$DB_PASSWD mysql -u $DB_USER -h $DB_HOST
 ```
