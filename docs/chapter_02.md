@@ -272,6 +272,9 @@ variable "vpc_id" { type = string }  // < 追加 >
 variable "subnets" { type = list(string) }  // < 追加 >
 variable "db_user" { type = string }  // < 追加 >
 variable "db_password" { type = string }  // < 追加 >
+variable "app_image_uri" { type = string }  // < 追加 >
+variable "alb_subnets" { type = list(string) }  // < 追加 >
+variable "cicd_artifact_bucket" { type = string }  // < 追加 >
 
 // 出力
 output db_secrets_manager_arn {  // < 追加 >
@@ -308,11 +311,26 @@ touch ${CONTAINER_PROJECT_ROOT}/terraform/envs/${ENV_NAME}/environment.auto.tfva
 `terraform/envs/${ENV_NAME}/environment.auto.tfvars`
 
 ```hcl
+// VPCのID
+vpc_id = "vpc-xxxxxxxxxxxxxxxxx"
+
+// サブネットID
+subnets = ["subnet-xxxxxxxxxxxxxxxxx", "subnet-xxxxxxxxxxxxxxxxx"]
+
 // DBのユーザー名
 db_user = "sysadmin"
 
 // DBのパスワード
 db_password = "sysadmin1234"
+
+// アプリ・バッチで利用するコンテナイメージのURI
+app_image_uri = "xxxxxxxxxxxx.dkr.ecr.ap-northeast-1.amazonaws.com/terraform-tutorial/xxx/app"
+
+// ALBのサブネットID (2つ以上指定する)
+alb_subnets = ["subnet-xxxxxxxxxxxxxxxxx", "subnet-xxxxxxxxxxxxxxxxx"]
+
+// CICD用のS3バケット名
+cicd_artifact_bucket = "xxxxxxxxxxxxxxxxxxxxxxx"
 ```
 
 # ■ 4. デプロイ

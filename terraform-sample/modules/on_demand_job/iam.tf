@@ -2,7 +2,7 @@
  * ECSタスク実行ロール
  *******************************/
 resource "aws_iam_role" "ecs_task_execution_role" {
-  name = "${var.app_name}-${var.stage}-${var.batch_name}-OnDemandJob-EcsTaskExecutionRole"
+  name = "${var.app_name}-${var.stage}-${var.batch_name}-OnDemandJob-EcsTaskExeRole"
   assume_role_policy = data.aws_iam_policy_document.assume_ecs_task_exec_role_policy.json
 }
 

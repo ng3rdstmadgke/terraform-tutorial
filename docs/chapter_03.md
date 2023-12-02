@@ -418,7 +418,6 @@ resource "aws_iam_role_policy_attachment" "attach_lambda_role_policy" {
 # ■ 4. 定義したモジュールをエントリーポイントから参照
 
 
-
 `terraform/envs/${ENV_NAME}/main.tf`
 
 ```hcl
