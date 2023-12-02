@@ -554,34 +554,6 @@ resource "aws_iam_role_policy_attachment" "attach_xray_access_policy" {
 ```hcl
 // ... 略 ...
 
-module "fibonacci_job" {
-  source              = "../../modules/on_demand_job"
-  account_id          = local.account_id
-  app_name            = local.app_name
-  stage               = local.stage
-  batch_name          = "fibonacci"
-  env                 = {
-    "STAGE" : local.stage,
-    "SNS_ARN": module.base.sns_topic_arn,
-    "DB_NAME": local.stage,
-    "DB_SECRET_NAME": "/${local.app_name}/${local.stage}/db",
-    "JOB_QUEUE_URL": "dummy"
-  }
-  batch_job_queue_arn = module.job_base.job_queue_arn
-  image_uri           = var.app_image_uri
-  image_tag           = "latest"
-  command             = [
-    "python",
-    "/opt/app/job/fibonacci.py",
-    "-b",
-    "Ref::sqs_message_body",  # SQSに送信されたキューのBody
-  ]
-  success_handler_arn = module.job_base.success_handler.arn
-  error_handler_arn = module.job_base.error_handler.arn
-  vcpus               = "1"
-  memory              = "2048"
-}
-
 module "crawler_job" {  // < 追加 >
   source              = "../../modules/scheduled_job"
   account_id          = local.account_id

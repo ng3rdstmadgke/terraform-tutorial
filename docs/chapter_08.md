@@ -246,7 +246,7 @@ module "monitoring" {  // 追加
 # ■ 6. デプロイ
 
 ```bash
-cd terraform/envs/${ENV_NAME}
+cd ${CONTAINER_PROJECT_ROOT}/terraform/envs/${ENV_NAME}
 
 # 初期化
 terraform init
@@ -254,7 +254,7 @@ terraform init
 # デプロイ内容確認
 terraform plan
 
-# 作成
+# デプロイ
 terraform apply -auto-approve
 ```
 

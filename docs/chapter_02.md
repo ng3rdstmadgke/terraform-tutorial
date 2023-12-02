@@ -301,7 +301,7 @@ module "db" {  // < 追加 >
 }
 ```
 
-`variable` で定義した変数は terraform 実行時に指定する必要がありますが、毎回オプションとして指定するのは大変+ミスが起こるので、 `environment.auto.tfvars` というファイルを作成します。  
+`variable` で定義した変数は terraform 実行時に指定する必要がありますが、実行時にインタラクティブに指定するのは大変+ミスが起こるので、 `environment.auto.tfvars` というファイルを作成します。  
 ※ 末尾が `.auto.tfvars` のファイルが存在すると、ファイル内に定義された変数が自動的に `variable` にアサインされます。
 
 ```bash

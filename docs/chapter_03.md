@@ -423,19 +423,6 @@ resource "aws_iam_role_policy_attachment" "attach_lambda_role_policy" {
 ```hcl
 // ... 略 ...
 
-module "db" {
-  source              = "../../modules/db"
-  app_name            = local.app_name
-  stage               = local.stage
-  vpc_id              = var.vpc_id
-  subnets             = var.subnets
-  db_name             = local.stage
-  db_user             = var.db_user
-  db_password         = var.db_password
-  ingress_cidr_blocks = [local.vpc_cidr_block]
-  instance_num        = 1
-}
-
 module "job_base" { // < 追加 >
   source              = "../../modules/job_base"
   app_name            = local.app_name

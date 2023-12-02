@@ -23,12 +23,13 @@ Chapter6 ロードバランサー
 
 
 ```bash
-mkdir -p terraform terraform/modules/alb
-( cd terraform/modules/alb; touch main.tf variables.tf outputs.tf)
+ENV_NAME="your_name"
+mkdir -p ${CONTAINER_PROJECT_ROOT}/terraform/modules/alb
+touch ${CONTAINER_PROJECT_ROOT}/terraform/modules/alb/{main.tf,variables.tf,outputs.tf,iam.tf}
 ```
 
-
-# ■ 3. 入力値・出力値の定義
+# ■ 3. albモジュールの作成
+## 1. 入力値・出力値の定義
 
 `terraform/modules/alb/variables.tf`
 
@@ -54,14 +55,13 @@ variable "ingress_rules_cidr_blocks" {
 `terraform/modules/alb/outputs.tf`
 
 ```tf
-// 作成したALBリソース
 output "app_alb" {
   value = aws_lb.app_alb
 }
 ```
 
 
-# ■ 4. リソース定義
+## 2. リソース定義
 
 
 ALBとそのセキュリティグループを作成します。  
@@ -135,35 +135,17 @@ resource "aws_lb" "app_alb" {
     #prevent_destroy = true
   }
 }
-
 ```
 
-# ■ 5. 定義したモジュールをエントリーポイントから参照する
+# ■ 4. 定義したモジュールをエントリーポイントから参照する
 
 `terraform/envs/${ENV_NAME}/main.tf`
 
 ```hcl
 // ... 略 ...
 
-// 変数定義
-variable "vpc_id" { type = string }
-variable "alb_subnets" { type = list(string) }
 
-// ローカル変数を定義
-locals {
-  aws_region      = data.aws_region.current.name
-  account_id      = data.aws_caller_identity.self.account_id
-  app_name        = replace(lower("terraformtutorial"), "-", "")
-  stage           = "ステージ名"
-}
-
-// 出力
-output "alb_host_name" {
-  value = module.alb.app_alb.dns_name
-}
-
-// albモジュールを利用
-module "alb" {
+module "alb" {  // < 追加 >
   source      = "../../modules/alb"
   app_name    = local.app_name
   stage       = local.stage
@@ -172,26 +154,10 @@ module "alb" {
 }
 ```
 
-variable で宣言した変数は `terraform apply` 実行時にインタラクティブに指定してもいいですが、今回は `environment.auto.tfvars` を利用して指定してみましょう。
-`*.auto.tfvars` で宣言した値は自動的に変数としてアサインされます。
+# ■ 5. デプロイ
 
 ```bash
-touch terraform/envs/${ENV_NAME}/environment.auto.tfvars
-```
-
-`terraform/envs/${ENV_NAME}/environment.auto.tfvars`
-
-```hcl
-vpc_id = "vpc-xxxxxxxxxxxxxxxxx"
-
-// ALBを配置するためのサブネット (public)
-alb_subnets = ["subnet-xxxxxxxxxxxxxxxxx", "subnet-xxxxxxxxxxxxxxxxx"]
-```
-
-# ■ 6. デプロイ
-
-```bash
-cd terraform/envs/${ENV_NAME}
+cd ${CONTAINER_PROJECT_ROOT}/terraform/envs/${ENV_NAME}
 
 # 初期化
 terraform init
@@ -199,6 +165,6 @@ terraform init
 # デプロイ内容確認
 terraform plan
 
-# 作成
+# デプロイ
 terraform apply -auto-approve
 ```

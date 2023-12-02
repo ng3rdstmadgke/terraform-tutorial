@@ -6,6 +6,7 @@ resource "aws_security_group" "app_alb_sg" {
   name   = "${var.app_name}-${var.stage}-app-alb-sg"
   vpc_id = var.vpc_id
 
+  // HTTPアクセスを許可
   ingress {
     from_port   = 80
     to_port     = 80
@@ -19,6 +20,7 @@ resource "aws_security_group" "app_alb_sg" {
     protocol    = "tcp"
     cidr_blocks = var.ingress_rules_cidr_blocks
   }
+  // HTTPSアクセスを許可
   ingress {
     from_port   = 443
     to_port     = 443
@@ -49,13 +51,13 @@ resource "aws_lb" "app_alb" {
   subnets            = var.alb_subnets
   ip_address_type    = "ipv4"
   idle_timeout       = 60
-  internal           = false
+  internal           = false  // privateサブネットにALBを作成する場合はtrue
 
   lifecycle {
-    # 変更を適用しない
+    # terraformの変更を適用しない
     # https://developer.hashicorp.com/terraform/language/meta-arguments/lifecycle#ignore_changes
     ignore_changes = all
-    # 強制的なリソースの再作成が起こらないようにする
+    # 強制的なリソースの再作成が起こらないようにする (本番環境では有効化)
     # https://developer.hashicorp.com/terraform/language/meta-arguments/lifecycle#prevent_destroy
     #prevent_destroy = true
   }
