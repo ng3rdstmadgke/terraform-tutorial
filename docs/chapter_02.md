@@ -15,7 +15,7 @@ Chapter2 データベース
 `db` モジュールを作成します。
 
 ```bash
-ENV_NAME="your_name"
+STAGE="your_name"
 mkdir -p ${CONTAINER_PROJECT_ROOT}/terraform/modules/db
 touch ${CONTAINER_PROJECT_ROOT}/terraform/modules/db/{main.tf,variables.tf,outputs.tf,iam.tf}
 ```
@@ -252,7 +252,7 @@ resource "aws_secretsmanager_secret_version" "aurora_serverless_mysql80" {
 
 # ■ 3. 定義したモジュールをエントリーポイントから参照
 
-`terraform/envs/${ENV_NAME}/main.tf`
+`terraform/envs/${STAGE}/main.tf`
 
 ```hcl
 // ... 略 ...
@@ -262,7 +262,7 @@ locals {
   aws_region      = data.aws_region.current.name
   account_id      = data.aws_caller_identity.self.account_id
   app_name        = replace(lower("terraformtutorial"), "-", "")
-  stage           = "ステージ名"  // NOTE: ENV_NAMEに指定した名前
+  stage           = "ステージ名"  // NOTE: STAGEに指定した名前
   vpc_cidr_block  = "xxx.xxx.xxx.xxx/16"  // NOTE: VPCのCIDRブロック
   repository_name = "xxxxxxxxxxxx"  // NOTE: CodeCommitに作成したリポジトリ名
 }
@@ -305,10 +305,10 @@ module "db" {  // < 追加 >
 ※ 末尾が `.auto.tfvars` のファイルが存在すると、ファイル内に定義された変数が自動的に `variable` にアサインされます。
 
 ```bash
-touch ${CONTAINER_PROJECT_ROOT}/terraform/envs/${ENV_NAME}/environment.auto.tfvars
+touch ${CONTAINER_PROJECT_ROOT}/terraform/envs/${STAGE}/environment.auto.tfvars
 ```
 
-`terraform/envs/${ENV_NAME}/environment.auto.tfvars`
+`terraform/envs/${STAGE}/environment.auto.tfvars`
 
 ```hcl
 // VPCのID
@@ -336,7 +336,7 @@ cicd_artifact_bucket = "xxxxxxxxxxxxxxxxxxxxxxx"
 # ■ 4. デプロイ
 
 ```bash
-cd ${CONTAINER_PROJECT_ROOT}/terraform/envs/${ENV_NAME}
+cd ${CONTAINER_PROJECT_ROOT}/terraform/envs/${STAGE}
 
 # 初期化
 terraform init

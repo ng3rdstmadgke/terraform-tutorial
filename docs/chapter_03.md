@@ -18,7 +18,7 @@ VPC上で動作するlambda関数をデプロイするためのモジュール�
 `lambda` モジュールを定義します。
 
 ```bash
-ENV_NAME="your_name"
+STAGE="your_name"
 mkdir -p ${CONTAINER_PROJECT_ROOT}/terraform/modules/lambda
 touch ${CONTAINER_PROJECT_ROOT}/terraform/modules/lambda/{main.tf,variables.tf,outputs.tf,iam.tf}
 ```
@@ -182,7 +182,7 @@ job_baseモジュールでは、AWS Batchのコンピューティング環境の
 `job_base` モジュールを定義します。
 
 ```bash
-ENV_NAME="your_name"
+STAGE="your_name"
 mkdir -p ${CONTAINER_PROJECT_ROOT}/terraform/modules/job_base
 touch ${CONTAINER_PROJECT_ROOT}/terraform/modules/job_base/{main.tf,variables.tf,outputs.tf,iam.tf}
 ```
@@ -418,7 +418,7 @@ resource "aws_iam_role_policy_attachment" "attach_lambda_role_policy" {
 # ■ 4. 定義したモジュールをエントリーポイントから参照
 
 
-`terraform/envs/${ENV_NAME}/main.tf`
+`terraform/envs/${STAGE}/main.tf`
 
 ```hcl
 // ... 略 ...
@@ -442,7 +442,7 @@ module "job_base" { // < 追加 >
 # ■ 5. デプロイ
 
 ```bash
-cd ${CONTAINER_PROJECT_ROOT}/terraform/envs/${ENV_NAME}
+cd ${CONTAINER_PROJECT_ROOT}/terraform/envs/${STAGE}
 
 # 初期化
 terraform init

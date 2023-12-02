@@ -13,7 +13,7 @@ Chapter9 CICD
 ECSリソースを定義する `cicd` モジュールを定義します。
 
 ```bash
-ENV_NAME="your_name"
+STAGE="your_name"
 mkdir -p ${CONTAINER_PROJECT_ROOT}/terraform/modules/cicd/resources
 touch ${CONTAINER_PROJECT_ROOT}/terraform/modules/cicd/{main.tf,variables.tf,outputs.tf,iam.tf}
 touch ${CONTAINER_PROJECT_ROOT}/terraform/modules/cicd/resources/buildspec.yml
@@ -981,7 +981,7 @@ artifacts:
 buildspec.ymlの出力アーティファクトである appspec.yml と taskdef.json を生成するリソースを定義します。  
 terraformでこれらのファイルを生成することにより、「イメージは最新だけど、古いタスク定義でデプロイされてしまった」みたいな事故を防ぐことができます。
 
-`terraform/envs/${ENV_NAME}/main.tf`
+`terraform/envs/${STAGE}/main.tf`
 
 ```hcl
 // ... 略 ...
@@ -1079,7 +1079,7 @@ EOF
 }
 ```
 
-`terraform/envs/${ENV_NAME}/environment.auto.tfvars`
+`terraform/envs/${STAGE}/environment.auto.tfvars`
 
 ```hcl
 // CodePipeline用アーティファクト保存バケット
@@ -1089,7 +1089,7 @@ cicd_artifact_bucket = "xxxxxxxxxxxxxxx"
 # ■ 6. デプロイ
 
 ```bash
-cd ${CONTAINER_PROJECT_ROOT}/terraform/envs/${ENV_NAME}
+cd ${CONTAINER_PROJECT_ROOT}/terraform/envs/${STAGE}
 
 # 初期化
 terraform init
@@ -1103,13 +1103,13 @@ terraform apply -auto-approve
 
 # ■ 7. CodePipelineによるアプリのデプロイ
 
-`terraform apply` を実施すると、 `tfexports/${ENV_NAME}` 配下に `appspec.yml` , `taskdef.json` といったCodeDeployで利用されるファイルが生成されます。  
+`terraform apply` を実施すると、 `tfexports/${STAGE}` 配下に `appspec.yml` , `taskdef.json` といったCodeDeployで利用されるファイルが生成されます。  
 このファイルをcommitし、EventBridgeで監視しているブランチにpushします。
 
 ```bash
 git add .
 git commit -m "tfexports"
-git push codecommit main:${ENV_NAME}
+git push codecommit main:${STAGE}
 ```
 
 pushするとEventBridgeがCodePipelineをキックします。  

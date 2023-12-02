@@ -23,7 +23,7 @@ Chapter6 ロードバランサー
 
 
 ```bash
-ENV_NAME="your_name"
+STAGE="your_name"
 mkdir -p ${CONTAINER_PROJECT_ROOT}/terraform/modules/alb
 touch ${CONTAINER_PROJECT_ROOT}/terraform/modules/alb/{main.tf,variables.tf,outputs.tf,iam.tf}
 ```
@@ -139,11 +139,14 @@ resource "aws_lb" "app_alb" {
 
 # ■ 4. 定義したモジュールをエントリーポイントから参照する
 
-`terraform/envs/${ENV_NAME}/main.tf`
+`terraform/envs/${STAGE}/main.tf`
 
 ```hcl
 // ... 略 ...
 
+output "alb_host_name" {  // < 追加 >
+  value = module.alb.app_alb.dns_name
+}
 
 module "alb" {  // < 追加 >
   source      = "../../modules/alb"
@@ -157,7 +160,7 @@ module "alb" {  // < 追加 >
 # ■ 5. デプロイ
 
 ```bash
-cd ${CONTAINER_PROJECT_ROOT}/terraform/envs/${ENV_NAME}
+cd ${CONTAINER_PROJECT_ROOT}/terraform/envs/${STAGE}
 
 # 初期化
 terraform init

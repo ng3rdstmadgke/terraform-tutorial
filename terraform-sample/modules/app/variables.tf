@@ -22,8 +22,10 @@ variable "app_alb_arn" {}
 // コンテナの環境変数
 variable "env" { type = map(any) }
 
+// snsのトピックARN
 variable "sns_topic_arn" {}
 
+// オンデマンドジョブを実行するためのSQSのARN
 variable "job_queue_arn" {}
 
 // HTTPSでアクセスする場合のSSL証明書のARN

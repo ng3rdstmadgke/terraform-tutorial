@@ -13,7 +13,7 @@ Chapter8 オートスケーリング
 ECSリソースを定義する `monitoring` モジュールを定義します。
 
 ```bash
-ENV_NAME="your_name"
+STAGE="your_name"
 mkdir -p ${CONTAINER_PROJECT_ROOT}/terraform/modules/monitoring
 touch ${CONTAINER_PROJECT_ROOT}/terraform/modules/monitoring/{main.tf,variables.tf,outputs.tf,iam.tf}
 ```
@@ -228,7 +228,7 @@ resource "aws_appautoscaling_policy" "ecs_1_policy" {
 
 # ■ 5. 定義したモジュールをエントリーポイントから参照する
 
-`terraform/envs/${ENV_NAME}/main.tf`
+`terraform/envs/${STAGE}/main.tf`
 
 ```hcl
 // ... 略 ...
@@ -247,7 +247,7 @@ module "monitoring" {  // 追加
 # ■ 6. デプロイ
 
 ```bash
-cd ${CONTAINER_PROJECT_ROOT}/terraform/envs/${ENV_NAME}
+cd ${CONTAINER_PROJECT_ROOT}/terraform/envs/${STAGE}
 
 # 初期化
 terraform init

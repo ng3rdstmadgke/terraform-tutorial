@@ -13,12 +13,13 @@ Chapter7 ECS
 ECSリソースを定義する `app` モジュールを定義します。
 
 ```bash
-ENV_NAME="your_name"
+STAGE="your_name"
 mkdir -p ${CONTAINER_PROJECT_ROOT}/terraform/modules/app
 touch ${CONTAINER_PROJECT_ROOT}/terraform/modules/app/{main.tf,variables.tf,outputs.tf,iam.tf}
 ```
 
-# ■ 3. 入力値・出力値の定義
+# ■ 3. app モジュールの作成
+## 1. 入力値・出力値の定義
 
 `terraform/modules/app/variables.tf`
 
@@ -46,6 +47,12 @@ variable "app_alb_arn" {}
 
 // コンテナの環境変数
 variable "env" { type = map(any) }
+
+// snsのトピックARN
+variable "sns_topic_arn" {}
+
+// オンデマンドジョブを実行するためのSQSのARN
+variable "job_queue_arn" {}
 
 // HTTPSでアクセスする場合のSSL証明書のARN
 variable "certificate_arn" {
@@ -114,10 +121,10 @@ output "container_port" {
 }
 ```
 
-# ■ 4. リソース定義
+## 2. リソース定義
 
 
-## ALBのターゲットグループ・リスナー
+### ALBのターゲットグループ・リスナー
 
 Blue/Greenデプロイを利用するため、本番用のリスナーとスタンバイ用の2つのリスナーを作成します。
 HTTPSの利用の有無で作成するリスナーが異なります。
@@ -160,7 +167,7 @@ resource "aws_lb_target_group" "app_tg_1" {
     timeout             = 5
     healthy_threshold   = 3
     unhealthy_threshold = 3
-    path                = "/healthcheck"
+    path                = "/api/healthcheck/"
     protocol            = "HTTP"
     matcher             = "200"
   }
@@ -183,7 +190,7 @@ resource "aws_lb_target_group" "app_tg_2" {
     timeout             = 5
     healthy_threshold   = 3
     unhealthy_threshold = 3
-    path                = "/healthcheck"
+    path                = "/api/healthcheck/"
     protocol            = "HTTP"
     matcher             = "200"
   }
@@ -306,7 +313,7 @@ resource "aws_lb_listener" "app_listener_blue" {
 }
 ```
 
-## ECSクラスター
+### ECSクラスター
 
 最低1コンテナだけは `FARGATE` で、中断されることがないコンテナとして動作させ、 スケールアウトされたコンテナは中断される可能性がある `FARGATE_SPOT` を優先します。
 
@@ -346,7 +353,7 @@ resource "aws_ecs_cluster_capacity_providers" "app_cluster_capacity_providers" {
 }
 ```
 
-## ECSタスク定義
+### ECSタスク定義
 
 ECSのタスクロールとタスク実行ロールを定義します。
 
@@ -464,6 +471,24 @@ resource "aws_iam_policy" "ecs_task_policy" {
         "Resource" : [
           "arn:aws:secretsmanager:ap-northeast-1:${var.account_id}:secret:/${var.app_name}/*"
         ]
+      },
+      {
+        "Effect": "Allow",
+        "Action": [
+          "sns:Publish"
+        ],
+        "Resource": [
+          var.sns_topic_arn
+        ]
+      },
+      {
+        "Action": [
+          "sqs:SendMessage"
+        ],
+        "Effect": "Allow",
+        "Resource": [
+          var.job_queue_arn
+        ]
       }
     ]
   })
@@ -576,7 +601,7 @@ resource "aws_ecs_task_definition" "app_task_definition" {
       // dockerのヘルスチェック機能: https://docs.docker.jp/engine/reference/run.html#run-healthcheck
       // 書き方: https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/aws-properties-ecs-taskdefinition-healthcheck.html
       HealthCheck = {
-        command     = ["CMD-SHELL", "curl -H 'User-Agent: Docker-HealthChecker' -f 'http://localhost/healthcheck' || exit 1"]
+        command     = ["CMD-SHELL", "curl -H 'User-Agent: Docker-HealthChecker' -f 'http://localhost/api/healthcheck/' || exit 1"]
         interval    = 15
         timeout     = 5
         retries     = 3
@@ -587,7 +612,7 @@ resource "aws_ecs_task_definition" "app_task_definition" {
 }
 ```
 
-## ECSサービス
+### ECSサービス
 
 ※ ECSサービスはECSのタスク数を管理するためのリソースです。
 
@@ -682,41 +707,19 @@ resource "aws_ecs_service" "app_service" {
 }
 ```
 
-# ■ 5. 定義したモジュールをエントリーポイントから参照する
+# ■ 4. 定義したモジュールをエントリーポイントから参照する
 
-`terraform/envs/${ENV_NAME}/main.tf`
+`app` モジュールの呼び出しと同時に、環境変数ファイルの出力を行うことで、開発環境からDBなどのリソースにアクセスできるようにしておきます。
+
+`terraform/envs/${STAGE}/main.tf`
 
 ```hcl
 // ... 略 ...
 
-// 変数定義
-variable "vpc_id" { type = string }
-variable "alb_subnets" { type = list(string) }
-variable "subnets" { type = list(string) }  // 追加
-variable "app_image_uri" { type = string }  // 追加
 
-// ローカル変数を定義
-locals {
-  aws_region      = data.aws_region.current.name
-  account_id      = data.aws_caller_identity.self.account_id
-  app_name        = replace(lower("terraformtutorial"), "-", "")
-  stage           = "ステージ名"
-  vpc_cidr_block  = "xxx.xxx.xxx.xxx/xx"  // 追加
-  env = {  // 追加
-    "APP_NAME" : local.app_name,
-    "STAGE" : local.stage,
-  }
-}
-
-// 出力
-output "alb_host_name" {
-  value = module.alb.app_alb.dns_name
-}
-output "task_definition" {  // 追加
+output "task_definition" {
   value = "${module.app.ecs_task_family}:${module.app.ecs_task_revision}"
 }
-
-// ... 略 ...
 
 module "app" {
   source              = "../../modules/app"
@@ -728,24 +731,36 @@ module "app" {
   subnets             = var.subnets
   ingress_cidr_blocks = [local.vpc_cidr_block]
   app_alb_arn         = module.alb.app_alb.arn
-  env                 = local.env
+  sns_topic_arn       = module.base.sns_topic_arn
+  job_queue_arn       = module.fibonacci_job.queue_arn
+  env                 = {
+    "STAGE" : local.stage,
+    "SNS_ARN": module.base.sns_topic_arn,
+    "DB_NAME": local.stage,
+    "DB_SECRET_NAME": "/${local.app_name}/${local.stage}/db",
+    "JOB_QUEUE_URL": module.fibonacci_job.queue_url,
+  }
+}
+
+// 環境変数ファイルを作成
+resource "local_file" "env_file" {
+  // https://registry.terraform.io/providers/hashicorp/local/latest/docs/resources/file
+  filename = "../../../env/${local.stage}.env"
+  content  = <<EOF
+STAGE=${local.stage}
+SNS_ARN=${module.base.sns_topic_arn}
+DB_NAME=${local.stage}
+DB_SECRET_NAME=/${local.app_name}/${local.stage}/db
+JOB_QUEUE_URL=${module.fibonacci_job.queue_url}
+
+EOF
 }
 ```
 
-`terraform/envs/${ENV_NAME}/environment.auto.tfvars`
-
-```hcl
-// ECSタスク・データベースを配置するためのサブネット (private)
-subnets = ["subnet-xxxxxxxxxxxxxxxxx", "subnet-xxxxxxxxxxxxxxxxx"]
-
-// ECRリポジトリ
-app_image_uri = "xxxxxxxxxxxx.dkr.ecr.ap-northeast-1.amazonaws.com/xxxxxxxxxxxxxxxxxxxxxxxxxx"
-```
-
-# ■ 6. デプロイ
+# ■ 5. デプロイ
 
 ```bash
-cd ${CONTAINER_PROJECT_ROOT}/terraform/envs/${ENV_NAME}
+cd ${CONTAINER_PROJECT_ROOT}/terraform/envs/${STAGE}
 
 # 初期化
 terraform init
@@ -756,3 +771,46 @@ terraform plan
 # デプロイ
 terraform apply -auto-approve
 ```
+
+# ■ 6. 環境変数ファイルを利用したDBへのアクセス
+
+デプロイされたアプリが実際に利用しているDBにアクセスしてみましょう
+
+※ DBと同じVPC上で動作するEC2上で操作している場合のみ可能です。
+
+```bash
+# デプロイした環境変数を利用して、開発shellを立ち上げ
+./bin/run.sh -m shell -e env/${STAGE}.env 
+
+# データベースの初期化
+./bin/init-database.sh
+
+# mysqlにログイン
+./bin/mysql.sh
+
+# テーブル一覧
+MySQL [mido]> show tables;
++-----------------+
+| Tables_in_mido  |
++-----------------+
+| alembic_version |
+| jobs            |
++-----------------+
+2 rows in set (0.003 sec)
+
+# mysqlからログアウト
+MySQL [mido]> exit
+
+# 開発shellからログアウト
+exit
+```
+
+# ■ ブラウザでアクセス
+
+デプロイが完了したら `terraform output` コマンドで出力される `alb_host_name` にブラウザでアクセスしてみましょう
+
+```bash
+terraform output
+```
+
+<img src="img/07/app.png" width="900px">

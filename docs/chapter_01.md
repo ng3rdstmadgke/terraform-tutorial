@@ -328,10 +328,10 @@ terraform destroy
 
 ```bash
 # 半角英数字のみ
-ENV_NAME="your_name"
+STAGE="your_name"
 
 # プロジェクトディレクトリ作成
-mkdir -p "terraform/envs/${ENV_NAME}" "terraform/modules"
+mkdir -p "terraform/envs/${STAGE}" "terraform/modules"
 ```
 
 ## .gitignore配置
@@ -386,10 +386,10 @@ terraformではリソースを `terraform.tfstate` というファイルで管�
 - [AWS Provider](https://registry.terraform.io/providers/hashicorp/aws/latest/docs)
 
 ```bash
-touch ${CONTAINER_PROJECT_ROOT}/terraform/envs/${ENV_NAME}/main.tf
+touch ${CONTAINER_PROJECT_ROOT}/terraform/envs/${STAGE}/main.tf
 ```
 
-`terraform/envs/${ENV_NAME}/main.tf`
+`terraform/envs/${STAGE}/main.tf`
 
 ```hcl
 terraform {
@@ -442,7 +442,7 @@ data "aws_region" "current" {}
 現時点ではリソースは作成されませんが、一度デプロイと削除を試してみましょう。
 
 ```bash
-cd ${CONTAINER_PROJECT_ROOT}/terraform/envs/${ENV_NAME}
+cd ${CONTAINER_PROJECT_ROOT}/terraform/envs/${STAGE}
 
 # 初期化
 terraform init
@@ -480,7 +480,7 @@ sns topic を作成する `base` モジュールを作成してみましょう�
 `base` モジュールを作成します。
 
 ```bash
-ENV_NAME="your_name"
+STAGE="your_name"
 mkdir -p ${CONTAINER_PROJECT_ROOT}/terraform/modules/base
 touch ${CONTAINER_PROJECT_ROOT}/terraform/modules/base/{main.tf,variables.tf,outputs.tf}
 ```
@@ -516,7 +516,7 @@ resource "aws_sns_topic" "this" {
 
 ## 3. モジュールをエントリーポイントから参照
 
-モジュールに定義したリソースはエントリーポイント ( `terraform/envs/${ENV_NAME}/main.tf` )から、関数のように呼び出すことでデプロイできます。
+モジュールに定義したリソースはエントリーポイント ( `terraform/envs/${STAGE}/main.tf` )から、関数のように呼び出すことでデプロイできます。
 
 ```hcl
 // ... 略 ...
@@ -526,7 +526,7 @@ locals {  // < 追加 >
   aws_region      = data.aws_region.current.name
   account_id      = data.aws_caller_identity.self.account_id
   app_name        = replace(lower("terraformtutorial"), "-", "")
-  stage           = "ステージ名"  // NOTE: ENV_NAMEに指定した名前
+  stage           = "ステージ名"  // NOTE: STAGEに指定した名前
   vpc_cidr_block  = "xxx.xxx.xxx.xxx/16"  // NOTE: VPCのCIDRブロック
   repository_name = "xxxxxxxxxxxx"  // NOTE: CodeCommitに作成したリポジトリ名
 }
@@ -542,7 +542,7 @@ module "base" {  // < 追加 >
 ## 4. デプロイ
 
 ```bash
-cd ${CONTAINER_PROJECT_ROOT}/terraform/envs/${ENV_NAME}
+cd ${CONTAINER_PROJECT_ROOT}/terraform/envs/${STAGE}
 
 # 初期化
 terraform init
