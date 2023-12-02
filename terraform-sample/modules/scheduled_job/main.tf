@@ -108,7 +108,7 @@ resource "aws_sfn_state_machine" "scheduled_job" {
                     "JobQueue": "${var.batch_job_queue_arn}",
                     // Parameters: https://docs.aws.amazon.com/batch/latest/APIReference/API_SubmitJob.html#Batch-SubmitJob-request-parameters
                     "Parameters": {
-                      "sfn_input.$": "$.input"
+                      "sfn_input.$": "States.Format('\"{}\"', $.input)"  // Parameters内の値は文字列でなければならない
                     },
                     // ContainerOverrides: https://docs.aws.amazon.com/batch/latest/APIReference/API_ContainerOverrides.html
                     "ContainerOverrides": {
