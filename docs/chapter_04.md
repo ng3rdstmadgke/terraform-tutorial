@@ -46,7 +46,7 @@ variable "image_uri" {}
 // Batchで利用するイメージのタグ
 variable "image_tag" {}
 
-// Batchで実行するコマンド
+// Batchの実行コマンド
 variable "command" { type = list(string) }
 
 // Stepfunctionsで成功処理を行うLambda関数
