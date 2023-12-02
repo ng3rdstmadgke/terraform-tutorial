@@ -4,9 +4,10 @@ Chapter0 概要・前準備
 
 # ■ 0. Requirements
 
-### 1. ホストマシンにdockerをインストールしてください  
+### 1. ホストマシンにdockerとdocker-composeをインストールしてください  
 
-[Install Docker Engine | docker docs](https://docs.docker.com/engine/install/)
+- [Install Docker Engine | docker docs](https://docs.docker.com/engine/install/)
+- [Install Compose standalone ~ docker docs](https://docs.docker.com/compose/install/standalone/)
 
 ### 2. vscodeのdevcontainerを利用できるようにしておいてください
 
@@ -38,21 +39,45 @@ Chapter0 概要・前準備
 
 
 ```bash
-# データベースの初期化
+# 開発shellへのログイン
 ./bin/run.sh -m shell
+
+# データベースの初期化
 ./bin/init-database.sh
+
+# テーブルの確認
+./bin/mysql
+MySQL [local]> SHOW TABLES;
++-----------------+
+| Tables_in_local |
++-----------------+
+| alembic_version |
+| jobs            |
++-----------------+
+2 rows in set (0.001 sec)
+> exit
+
+
+
+# 開発shellからのログアウト
 exit
 
 # アプリの起動
 ./bin/run.sh
 ```
 
-ブラウザで http://localhost/docs にアクセスしてみましょう。  
-下記のようなFastAPIの画面が表示されるはずです。
+アプリが起動したら、ポートフォワーディングの画面を開き、 `terraform-tutorialapp:80` が転送されているアドレスの地球儀アイコンをクリックしてみましょう。
+
+<img src="img/00/vscode_port_foward.png" width="600px">
+
+下記の画面が表示されればOKです。
+
+<img src="img/00/app.png" width="600px">
+
+
+`/docs` にアクセスすると、FastAPIの画面が表示されます。
 
 <img src="img/00/fastapi_docs.png" width="700px">
-
-APIの確認ができたら、 http://localhost/ にアクセスしてアプリを操作してみましょう。
 
 
 
@@ -67,6 +92,9 @@ APIの確認ができたら、 http://localhost/ にアクセスしてアプリ�
 STAGE=dev
 AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
 AWS_REGION="ap-northeast-1"
+
+# 確認
+echo $STAGE $AWS_ACCOUNT_ID $AWS_REGION
 ```
 
 ## ECRリポジトリの作成 ~ プッシュ
@@ -78,7 +106,6 @@ REPOSITORY_NAME="terraform-tutorial/${STAGE}/app"
 
 # リポジトリ作成
 aws ecr create-repository --repository-name $REPOSITORY_NAME
-
 
 # イメージのビルド
 docker build --rm -f docker/app/Dockerfile -t ${REPOSITORY_NAME}:latest .
@@ -155,27 +182,4 @@ git remote add codecommit リモートリポジトリのURL
 
 # プッシュ
 git push codecommit main
-```
-
-# ■ サンプルのデプロイ (やりたい人だけ)
-
-完成サンプルをデプロイしてみたい方はこちらのコマンドで試してみてください。
-
-```bash
-cd terraform-sample/envs/dev
-terraform init
-terraform plan
-terraform apply -auto-approve
-```
-
-リソースの削除
-
-```bash
-cd terraform-sample/envs/dev
-
-# すべて削除
-terraform destroy
-
-# アプリリソースのみ削除
-terraform destroy -target=module.app
 ```
