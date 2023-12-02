@@ -233,7 +233,7 @@ resource "aws_appautoscaling_policy" "ecs_1_policy" {
 ```hcl
 // ... 略 ...
 
-module "monitoring" {  // 追加
+module "monitoring" {  // < 追加 >
   source              = "../../modules/monitoring"
   app_name            = local.app_name
   stage               = local.stage
@@ -264,7 +264,10 @@ terraform apply -auto-approve
 ALBに対して大量のリクエストを送信してみる
 
 ```bash
-while :; do curl "http://xxxxxxxxxxxxxxxxxxxxxxxxxxxxx.ap-northeast-1.elb.amazonaws.com/" >/dev/null 2>&1 ; done
+# ALBのエンドポイント
+ALB_HOST_NAME=$(terraform output -raw alb_host_name)
+
+while :; do curl "http://${ALB_HOST_NAME}/api/healthcheck/" >/dev/null 2>&1 ; done
 ```
 
 CloudWatchがアラーム状態となり、負荷に応じた数のECSのタスクが新たに起動します。
