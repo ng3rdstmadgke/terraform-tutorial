@@ -328,7 +328,7 @@ terraform destroy
 
 ```bash
 # 半角英数字のみ
-ENV_NAME="xxxxx"
+ENV_NAME="your_name"
 
 # プロジェクトディレクトリ作成
 mkdir -p "terraform/envs/${ENV_NAME}" "terraform/modules"
@@ -385,11 +385,14 @@ terraformではリソースを `terraform.tfstate` というファイルで管�
 
 - [AWS Provider](https://registry.terraform.io/providers/hashicorp/aws/latest/docs)
 
+```bash
+touch ${CONTAINER_PROJECT_ROOT}/terraform/envs/${ENV_NAME}/main.tf
+```
+
 `terraform/envs/${ENV_NAME}/main.tf`
 
 ```hcl
 terraform {
-  // 必要なプロバイダを定義
   required_providers {
     // AWS Provider: https://registry.terraform.io/providers/hashicorp/aws/latest/docs
     aws = {
@@ -404,12 +407,12 @@ terraform {
   // tfstateファイルをs3で管理する: https://developer.hashicorp.com/terraform/language/settings/backends/s3
   backend "s3" {
     // tfstate保存先のs3バケットとキー
-    bucket  = "xxxxxxxxxxxxxxxx"  // TODO: chapter0 で作成した "tfstate管理用s3バケット" を指定
+    bucket  = "xxxxxxxxxxxx"  // TODO: chapter0で作成したtfstate保存用バケットを指定
     region  = "ap-northeast-1"
-    key     = "path/to/terraform.tfstate"  // TODO: tfstate保存先パスを指定
+    key     = "path/to/terraform.tfstate"  // TODO: tfstateを保存するパスを指定
     encrypt = true
     // tfstateファイルのロック情報をDynamoDBで管理する: https://developer.hashicorp.com/terraform/language/settings/backends/s3#dynamodb-state-locking
-    dynamodb_table = "xxxxxxxxxxxx"  // TODO: chapter0 で作成した "tfstateロック用のdynamodbテーブル" を指定
+    dynamodb_table = "xxxxxxxxxxxx"  // TODO: chapter0で作成したtfstateロック用のDynamoDBテーブル名を指定
   }
 }
 
@@ -439,7 +442,7 @@ data "aws_region" "current" {}
 現時点ではリソースは作成されませんが、一度デプロイと削除を試してみましょう。
 
 ```bash
-cd terraform/envs/${ENV_NAME}
+cd ${CONTAINER_PROJECT_ROOT}/terraform/envs/${ENV_NAME}
 
 # 初期化
 terraform init
@@ -447,7 +450,7 @@ terraform init
 # デプロイ内容確認
 terraform plan
 
-# 作成
+# デプロイ
 terraform apply -auto-approve
 ```
 
