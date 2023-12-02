@@ -407,12 +407,12 @@ terraform {
   // tfstateファイルをs3で管理する: https://developer.hashicorp.com/terraform/language/settings/backends/s3
   backend "s3" {
     // tfstate保存先のs3バケットとキー
-    bucket  = "xxxxxxxxxxxx"  // TODO: chapter0で作成したtfstate保存用バケットを指定
+    bucket  = "xxxxxxxxxxxx"  // < 編集 >: chapter0で作成したtfstate保存用バケットを指定
     region  = "ap-northeast-1"
-    key     = "path/to/terraform.tfstate"  // TODO: tfstateを保存するパスを指定
+    key     = "path/to/terraform.tfstate"  // < 編集 >: tfstateを保存するパスを指定
     encrypt = true
     // tfstateファイルのロック情報をDynamoDBで管理する: https://developer.hashicorp.com/terraform/language/settings/backends/s3#dynamodb-state-locking
-    dynamodb_table = "xxxxxxxxxxxx"  // TODO: chapter0で作成したtfstateロック用のDynamoDBテーブル名を指定
+    dynamodb_table = "xxxxxxxxxxxx"  // < 編集 >: chapter0で作成したtfstateロック用のDynamoDBテーブル名を指定
   }
 }
 
@@ -437,7 +437,7 @@ data "aws_region" "current" {}
 ```
 
 
-# ■ terraformデプロイ
+# ■ 3. terraformデプロイ
 
 現時点ではリソースは作成されませんが、一度デプロイと削除を試してみましょう。
 
@@ -467,4 +467,89 @@ DynamoDBにtfstateのロックレコードが生成されていることを確�
 ```bash
 # 削除
 terraform destroy -auto-approve
+```
+
+
+# ■ 4. baseモジュールの作成
+
+sns topic を作成する `base` モジュールを作成してみましょう。
+
+
+## 1. ファイル作成
+
+`base` モジュールを作成します。
+
+```bash
+ENV_NAME="your_name"
+mkdir -p ${CONTAINER_PROJECT_ROOT}/terraform/modules/base
+touch ${CONTAINER_PROJECT_ROOT}/terraform/modules/base/{main.tf,variables.tf,outputs.tf}
+```
+
+## 2. リソース定義
+
+
+`terraform/modules/base/variables.tf`
+
+```hcl
+variable "app_name" {}
+variable "stage" {}
+```
+
+`terraform/modules/base/outputs.tf`
+
+```hcl
+output "sns_topic_arn" {
+  value = aws_sns_topic.this.arn
+}
+```
+
+`terraform/modules/base/main.tf`
+
+```hcl
+resource "aws_sns_topic" "this" {
+  name = "${var.app_name}-${var.stage}-topic"
+  lifecycle {
+    ignore_changes = all
+  }
+}
+```
+
+## 3. モジュールをエントリーポイントから参照
+
+モジュールに定義したリソースはエントリーポイント ( `terraform/envs/${ENV_NAME}/main.tf` )から、関数のように呼び出すことでデプロイできます。
+
+```hcl
+// ... 略 ...
+
+// ローカル変数を定義
+locals {  // < 追加 >
+  aws_region      = data.aws_region.current.name
+  account_id      = data.aws_caller_identity.self.account_id
+  app_name        = replace(lower("terraformtutorial"), "-", "")
+  stage           = "ステージ名"  // NOTE: ENV_NAMEに指定した名前
+  vpc_cidr_block  = "xxx.xxx.xxx.xxx/16"  // NOTE: VPCのCIDRブロック
+  repository_name = "xxxxxxxxxxxx"  // NOTE: CodeCommitに作成したリポジトリ名
+}
+
+module "base" {  // < 追加 >
+  source = "../../modules/base"
+  app_name    = local.app_name
+  stage       = local.stage
+}
+```
+
+
+## 4. デプロイ
+
+```bash
+cd ${CONTAINER_PROJECT_ROOT}/terraform/envs/${ENV_NAME}
+
+# 初期化
+terraform init
+
+# デプロイ内容確認
+terraform plan
+
+# デプロイ
+terraform apply -auto-approve
 ```

@@ -1,3 +1,4 @@
+// LambdaのレイヤーとソースコードをパッケージングするMakefileを実行
 resource "null_resource" "package_lambda_resource" {
   // https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource
   triggers = {
@@ -9,7 +10,7 @@ resource "null_resource" "package_lambda_resource" {
   }
 }
 
-// Archive
+// Makefileで作成したレイヤーをzipに圧縮
 data "archive_file" "layer_zip" {
   type        = "zip"
   source_dir  = "../../../.lambda-build/${var.function_name}/layer"
@@ -19,13 +20,14 @@ data "archive_file" "layer_zip" {
    ]
 }
 
+// Makefileで作成したソースコードをzipに圧縮
 data "archive_file" "function_zip" {
   type        = "zip"
   source_dir  = "../../../.lambda-build/${var.function_name}/src"
   output_path = "../../../.lambda-build/${var.function_name}/dist/src.zip"
   depends_on = [ 
     null_resource.package_lambda_resource
-   ]
+  ]
 }
 
 // Layer

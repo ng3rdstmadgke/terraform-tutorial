@@ -79,14 +79,6 @@ module "base" {
   stage       = local.stage
 }
 
-module "alb" {
-  source      = "../../modules/alb"
-  app_name    = local.app_name
-  stage       = local.stage
-  vpc_id      = var.vpc_id
-  alb_subnets = var.alb_subnets
-}
-
 module "db" {
   source              = "../../modules/db"
   app_name            = local.app_name
@@ -169,6 +161,14 @@ module "crawler_job" {
   memory              = "2048"
   # https://docs.aws.amazon.com/ja_jp/scheduler/latest/UserGuide/schedule-types.html
   schedule_expression = "rate(5 minutes)"  # 5分おき
+}
+
+module "alb" {
+  source      = "../../modules/alb"
+  app_name    = local.app_name
+  stage       = local.stage
+  vpc_id      = var.vpc_id
+  alb_subnets = var.alb_subnets
 }
 
 module "app" {

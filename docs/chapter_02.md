@@ -252,15 +252,13 @@ resource "aws_secretsmanager_secret_version" "aurora_serverless_mysql80" {
 
 # ■ 3. 定義したモジュールをエントリーポイントから参照
 
-モジュールに定義したリソースはエントリーポイント ( `terraform/envs/${ENV_NAME}/main.tf` )から、関数のように呼び出すことでデプロイできます。
-
 `terraform/envs/${ENV_NAME}/main.tf`
 
 ```hcl
 // ... 略 ...
 
 // ローカル変数を定義
-locals {  // TODO: 追加
+locals {
   aws_region      = data.aws_region.current.name
   account_id      = data.aws_caller_identity.self.account_id
   app_name        = replace(lower("terraformtutorial"), "-", "")
@@ -270,17 +268,23 @@ locals {  // TODO: 追加
 }
 
 // 変数定義
-variable "vpc_id" { type = string }  // TODO: 追加
-variable "subnets" { type = list(string) }  // TODO: 追加
-variable "db_user" { type = string }  // TODO: 追加
-variable "db_password" { type = string }  // TODO: 追加
+variable "vpc_id" { type = string }  // < 追加 >
+variable "subnets" { type = list(string) }  // < 追加 >
+variable "db_user" { type = string }  // < 追加 >
+variable "db_password" { type = string }  // < 追加 >
 
 // 出力
-output db_secrets_manager_arn {  // TODO: 追加
+output db_secrets_manager_arn {  // < 追加 >
   value = module.db.db_secrets_manager_arn
 }
 
-module "db" {  // TODO: 追加
+module "base" {
+  source = "../../modules/base"
+  app_name    = local.app_name
+  stage       = local.stage
+}
+
+module "db" {  // < 追加 >
   source              = "../../modules/db"
   app_name            = local.app_name
   stage               = local.stage
