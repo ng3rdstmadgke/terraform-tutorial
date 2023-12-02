@@ -453,7 +453,7 @@ module "job_base" { // < 追加 >
 }
 ```
 
-# ■ 4. デプロイ
+# ■ 5. デプロイ
 
 ```bash
 cd ${CONTAINER_PROJECT_ROOT}/terraform/envs/${ENV_NAME}
