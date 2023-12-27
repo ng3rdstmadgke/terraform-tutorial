@@ -170,8 +170,9 @@ aws s3api create-bucket \
 
 ※ 手順ではHTTPSでpushしていますが、sshでpushしてもかまいません
 
-- [Linux、macOS、または Unix での AWS CodeCommit リポジトリへの SSH 接続の設定手順 | AWS](https://docs.aws.amazon.com/ja_jp/codecommit/latest/userguide/setting-up-ssh-unixes.html)
-- [AWS CLI 認証情報ヘルパーを使用した、Linux、macOS、または UNIX での AWS CodeCommit リポジトリへの HTTPS 接続のセットアップ手順 | AWS](https://docs.aws.amazon.com/ja_jp/codecommit/latest/userguide/setting-up-https-unixes.html)
+- 参考
+  - [Linux、macOS、または Unix での AWS CodeCommit リポジトリへの SSH 接続の設定手順 | AWS](https://docs.aws.amazon.com/ja_jp/codecommit/latest/userguide/setting-up-ssh-unixes.html)
+  - [AWS CLI 認証情報ヘルパーを使用した、Linux、macOS、または UNIX での AWS CodeCommit リポジトリへの HTTPS 接続のセットアップ手順 | AWS](https://docs.aws.amazon.com/ja_jp/codecommit/latest/userguide/setting-up-https-unixes.html)
 
 
 ```bash
