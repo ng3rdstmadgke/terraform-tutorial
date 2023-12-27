@@ -46,7 +46,7 @@ Chapter0 概要・前準備
 ./bin/init-database.sh
 
 # テーブルの確認
-./bin/mysql
+./bin/mysql.sh
 MySQL [local]> SHOW TABLES;
 +-----------------+
 | Tables_in_local |
