@@ -11,13 +11,23 @@ Chapter0 概要・前準備
 
 ### 2. vscodeのdevcontainerを利用できるようにしておいてください
 
-このリポジトリはvscodeのdevcontainerで操作されることを前提としています
+※ このリポジトリはvscodeのdevcontainer上で操作されることを前提としています。  
+※ devcontainerについて詳しくはこちら -> [Developing inside a Container | Visual Studio Code](https://code.visualstudio.com/docs/devcontainers/containers)
+
+devcontainerのプラグインをインストールしてください。
+
+<img src="img/00/devcontainer_install.png" width="700px">
+
+プラグインのインストールが完了したら、devcontainerをを利用して開きなおしてください。
+
+<img src="img/00/devcontainer_run.png" width="700px">
 
 ### 3. ホストにAWSのクレデンシャルを設定してください
 
 `~/.aws/credentials` , `~/.aws/config` を作成してください。  
-※ EC2上で動作させる場合は、インスタンスロールが利用されるので、これらのファイルを作成する必要はありません。
 
+※ EC2上で動作させる場合は、インスタンスロールが利用されるので、これらのファイルを作成する必要はありません。
+※ ロール(もしくはユーザー)には `AdministratorAccessポリシー` をアタッチしておいてください。
 
 
 ### 3. サブネットを準備してください
