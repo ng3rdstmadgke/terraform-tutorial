@@ -1039,10 +1039,19 @@ resource "null_resource" "make_dir" {
   // https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource
   triggers = {
     always_run = timestamp()
+    stage = local.stage
   }
+
+  // terraform apply で実行される
   // local-exec: https://developer.hashicorp.com/terraform/language/resources/provisioners/local-exec
   provisioner "local-exec" {
-    command = "mkdir -p ../../../tfexports/${local.stage}"
+    command = "mkdir -p ../../../tfexports/${self.triggers.stage}"
+  }
+
+  // terraform destroy で実行される
+  provisioner "local-exec" {
+    when    = destroy
+    command = "rm -rf ../../../tfexports/${self.triggers.stage}"
   }
 }
 
@@ -1072,6 +1081,8 @@ resource "null_resource" "run_script" {
   triggers = {
     always_run = timestamp()
   }
+
+  // terraform apply で実行される
   provisioner "local-exec" {
     command = <<EOF
 aws ecs describe-task-definition \
