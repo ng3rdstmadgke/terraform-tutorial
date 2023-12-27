@@ -339,6 +339,16 @@ resource "aws_iam_role_policy_attachment" "attach_xray_access_policy" {
 
 StepFunctionsは下記のような定義で作成します。
 
+- Batch ステート (AWS Batch)
+  - `app/job/crawler.py` が実行されます。
+  - コンテナイメージはwebアプリで利用するコンテナと共通です。
+- OnSuccess ステート (AWS Lambda)
+  - `app/lambda/batch_success_handler.py` が実行されます。
+  - layerには `app/requirements.txt` に定義されたライブラリがインストールされます。
+- ErrorHandler ステート (AWS Lambda)
+  - `app/lambda/batch_error_handler.py` が実行されます。
+  - layerには `app/requirements.txt` に定義されたライブラリがインストールされます。
+
 <img src="img/05/stepfunctions_definition.png" width="900px">
 
 `terraform/modules/scheduled_job/main.tf`
