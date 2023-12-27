@@ -308,6 +308,10 @@ terraform apply
 #   -auto-approve: インタラクティブな確認をスキップできる
 #   -target=path.to.resource: 指定したリソースのみ削除できる
 terraform destroy
+
+# ロックを強制解除する: https://developer.hashicorp.com/terraform/cli/commands/force-unlock
+#   -force: インタラクティブな確認をスキップできる
+terraform force-unlock <LOCK_ID>
 ```
 
 ## そのほか参考資料
