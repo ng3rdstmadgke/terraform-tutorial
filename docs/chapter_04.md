@@ -389,7 +389,6 @@ resource "aws_sqs_queue" "pipe_source" {
   # 可視性タイムアウト (秒)
   # コンシューマがこの期間内にメッセージを処理して削除できなかった場合、メッセージは再度キューに表示される。
   visibility_timeout_seconds = 30
-  # NOTE: DLQ
 }
 
 /**

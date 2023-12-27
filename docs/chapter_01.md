@@ -389,6 +389,8 @@ terraformではリソースを `terraform.tfstate` というファイルで管�
 touch ${CONTAINER_PROJECT_ROOT}/terraform/envs/${STAGE}/main.tf
 ```
 
+※ `EDIT: ...` コメントの項目を各自編集してください
+
 `terraform/envs/${STAGE}/main.tf`
 
 ```hcl
@@ -407,12 +409,12 @@ terraform {
   // tfstateファイルをs3で管理する: https://developer.hashicorp.com/terraform/language/settings/backends/s3
   backend "s3" {
     // tfstate保存先のs3バケットとキー
-    bucket  = "xxxxxxxxxxxx"  // < 編集 >: chapter0で作成したtfstate保存用バケットを指定
+    bucket  = "xxxxxxxxxxxx"  // EDIT: chapter0で作成したtfstate保存用バケットを指定
     region  = "ap-northeast-1"
-    key     = "path/to/terraform.tfstate"  // < 編集 >: tfstateを保存するパスを指定
+    key     = "path/to/terraform.tfstate"  // EDIT: tfstateを保存するパスを指定
     encrypt = true
     // tfstateファイルのロック情報をDynamoDBで管理する: https://developer.hashicorp.com/terraform/language/settings/backends/s3#dynamodb-state-locking
-    dynamodb_table = "xxxxxxxxxxxx"  // < 編集 >: chapter0で作成したtfstateロック用のDynamoDBテーブル名を指定
+    dynamodb_table = "xxxxxxxxxxxx"  // EDIT: chapter0で作成したtfstateロック用のDynamoDBテーブル名を指定
   }
 }
 
@@ -518,6 +520,9 @@ resource "aws_sns_topic" "this" {
 
 モジュールに定義したリソースはエントリーポイント ( `terraform/envs/${STAGE}/main.tf` )から、関数のように呼び出すことでデプロイできます。
 
+※ `EDIT: ...` コメントの項目を各自編集してください
+
+
 ```hcl
 // ... 略 ...
 
@@ -526,9 +531,9 @@ locals {  // < 追加 >
   aws_region      = data.aws_region.current.name
   account_id      = data.aws_caller_identity.self.account_id
   app_name        = replace(lower("terraformtutorial"), "-", "")
-  stage           = "ステージ名"  // NOTE: STAGEに指定した名前
-  vpc_cidr_block  = "xxx.xxx.xxx.xxx/16"  // NOTE: VPCのCIDRブロック
-  repository_name = "xxxxxxxxxxxx"  // NOTE: CodeCommitに作成したリポジトリ名
+  stage           = "ステージ名"  // EDIT: STAGEに指定した名前
+  vpc_cidr_block  = "xxx.xxx.xxx.xxx/16"  // EDIT: VPCのCIDRブロック
+  repository_name = "xxxxxxxxxxxx"  // EDIT: CodeCommitに作成したリポジトリ名
 }
 
 module "base" {  // < 追加 >

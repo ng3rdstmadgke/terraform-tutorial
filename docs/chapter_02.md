@@ -252,6 +252,8 @@ resource "aws_secretsmanager_secret_version" "aurora_serverless_mysql80" {
 
 # ■ 3. 定義したモジュールをエントリーポイントから参照
 
+※ `EDIT: ...` コメントの項目を各自編集してください
+
 `terraform/envs/${STAGE}/main.tf`
 
 ```hcl
@@ -262,9 +264,9 @@ locals {
   aws_region      = data.aws_region.current.name
   account_id      = data.aws_caller_identity.self.account_id
   app_name        = replace(lower("terraformtutorial"), "-", "")
-  stage           = "ステージ名"  // NOTE: STAGEに指定した名前
-  vpc_cidr_block  = "xxx.xxx.xxx.xxx/16"  // NOTE: VPCのCIDRブロック
-  repository_name = "xxxxxxxxxxxx"  // NOTE: CodeCommitに作成したリポジトリ名
+  stage           = "ステージ名"  // EDIT: STAGEに指定した名前
+  vpc_cidr_block  = "xxx.xxx.xxx.xxx/16"  // EDIT: VPCのCIDRブロック
+  repository_name = "xxxxxxxxxxxx"  // EDIT: CodeCommitに作成したリポジトリ名
 }
 
 // 変数定義
