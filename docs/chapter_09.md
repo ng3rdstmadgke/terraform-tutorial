@@ -4,7 +4,7 @@ Chapter9 CICD
 
 # ■ 1. 作るもの
 
-この章ではECSのオートスケーリング機能を作成します。
+この章ではECSのCICD機能を作成します。
 
 <img src="img/09/drawio/architecture.drawio.png" width="900px">
 

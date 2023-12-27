@@ -155,6 +155,8 @@ aws dynamodb create-table \
 
 # ■ CICD用アーティファクト保存バケット作成
 
+「Chapter9 CICD」で作成するCodePipelineのアーティファクトを保存するためのバケットを作成します。
+
 ```bash
 CICD_BUCKET="xxxxxxxxxxxxxxxxx"
 
@@ -166,19 +168,28 @@ aws s3api create-bucket \
 
 # ■ CodeCommitにCICDの起点となるリポジトリを作成
 
+※ 手順ではHTTPSでpushしていますが、sshでpushしてもかまいません
+
+- [Linux、macOS、または Unix での AWS CodeCommit リポジトリへの SSH 接続の設定手順 | AWS](https://docs.aws.amazon.com/ja_jp/codecommit/latest/userguide/setting-up-ssh-unixes.html)
+- [AWS CLI 認証情報ヘルパーを使用した、Linux、macOS、または UNIX での AWS CodeCommit リポジトリへの HTTPS 接続のセットアップ手順 | AWS](https://docs.aws.amazon.com/ja_jp/codecommit/latest/userguide/setting-up-https-unixes.html)
+
 
 ```bash
 REPOSITORY_NAME="terraform-tutorial"
 
+# リポジトリの作成
 aws codecommit create-repository \
   --repository-name $REPOSITORY_NAME
 
-# リポジトリ情報を取得
-aws codecommit get-repository \
-  --repository-name $REPOSITORY_NAME
+# 認証情報ヘルパーを設定
+git config --global credential.helper '!aws codecommit credential-helper $@'
+git config --global credential.UseHttpPath true
+
+# リポジトリURL (HTTPS) を取得
+REPOSITORY_URL_HTTP=$(aws codecommit get-repository --repository-name $REPOSITORY_NAME | jq -r ".repositoryMetadata.cloneUrlHttp")
 
 # リモートリポジトリの登録
-git remote add codecommit リモートリポジトリのURL
+git remote add codecommit $REPOSITORY_URL_HTTP
 
 # プッシュ
 git push codecommit main
