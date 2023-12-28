@@ -9,9 +9,14 @@ Chapter0 概要・前準備
 - [Install Docker Engine | docker docs](https://docs.docker.com/engine/install/)
 - [Install Compose standalone ~ docker docs](https://docs.docker.com/compose/install/standalone/)
 
-### 2. vscodeのdevcontainerを利用できるようにしておいてください
+### 2. ソースコードを任意のディレクトリにクローンしてください
 
-※ このリポジトリはvscodeのdevcontainer上で操作されることを前提としています。  
+```bash
+git clone https://github.com/ng3rdstmadgke/terraform-tutorial.git
+```
+
+### 3. vscodeのdevcontainerでリポジトリを開いてください
+
 ※ devcontainerについて詳しくはこちら -> [Developing inside a Container | Visual Studio Code](https://code.visualstudio.com/docs/devcontainers/containers)
 
 devcontainerのプラグインをインストールしてください。
@@ -22,7 +27,7 @@ devcontainerのプラグインをインストールしてください。
 
 <img src="img/00/devcontainer_run.png" width="700px">
 
-### 3. ホストにAWSのクレデンシャルを設定してください
+### 4. ホストにAWSのクレデンシャルを設定してください
 
 `~/.aws/credentials` , `~/.aws/config` を作成してください。  
 
@@ -30,7 +35,7 @@ devcontainerのプラグインをインストールしてください。
 ※ ロール(もしくはユーザー)には `AdministratorAccessポリシー` をアタッチしておいてください。
 
 
-### 3. サブネットを準備してください
+### 5. サブネットを準備してください
 
 インターネットに疎通可能なPublicサブネット(2AZ)とPrivateサブネット(2AZ)を用意してください
 
