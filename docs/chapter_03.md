@@ -64,7 +64,7 @@ variable "ephemeral_storage_size" {
 }
 ```
 
-`terraform/modules/lambda/variables.tf`
+`terraform/modules/lambda/outputs.tf`
 
 ```hcl
 output "lambda_function" {

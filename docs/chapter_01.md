@@ -331,8 +331,8 @@ terraform force-unlock <LOCK_ID>
     サービス毎・ライフサイクル毎にある程度リソースをグループ化したモジュールを配置
 
 ```bash
-# 半角英数字のみ
-STAGE="your_name"
+# ステージ名は半角英数字で5文字まで
+STAGE="dev"
 
 # プロジェクトディレクトリ作成
 mkdir -p "terraform/envs/${STAGE}" "terraform/modules"

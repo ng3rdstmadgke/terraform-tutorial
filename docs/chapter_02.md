@@ -316,7 +316,7 @@ touch ${CONTAINER_PROJECT_ROOT}/terraform/envs/${STAGE}/environment.auto.tfvars
 // VPCのID
 vpc_id = "vpc-xxxxxxxxxxxxxxxxx"
 
-// サブネットID
+// ECSタスク・データベースを配置するためのサブネット (プライベートサブネットを指定してください)
 subnets = ["subnet-xxxxxxxxxxxxxxxxx", "subnet-xxxxxxxxxxxxxxxxx"]
 
 // DBのユーザー名
@@ -328,10 +328,10 @@ db_password = "sysadmin1234"
 // アプリ・バッチで利用するコンテナイメージのURI
 app_image_uri = "xxxxxxxxxxxx.dkr.ecr.ap-northeast-1.amazonaws.com/terraform-tutorial/xxx/app"
 
-// ALBのサブネットID (2つ以上指定する)
+// ALBを配置するサブネット (2つ以上のパブリックサブネットを指定してください)
 alb_subnets = ["subnet-xxxxxxxxxxxxxxxxx", "subnet-xxxxxxxxxxxxxxxxx"]
 
-// CICD用のS3バケット名
+// CICDのアーティファクト保管用S3バケット
 cicd_artifact_bucket = "xxxxxxxxxxxxxxxxxxxxxxx"
 ```
 
@@ -359,7 +359,7 @@ terraform apply -auto-approve
 ```bash
 # DBの接続情報を取得
 DB_SECRETS_MANAGER_ARN=$(terraform output -raw db_secrets_manager_arn)
-SECRET_VALUE=$(aws secretsmanager get-secret-value --secret-id arn:aws:secretsmanager:ap-northeast-1:674582907715:secret:/terraformtutorial/dev/db-lWE2Aq | jq -r ".SecretString")
+SECRET_VALUE=$(aws secretsmanager get-secret-value --secret-id $DB_SECRETS_MANAGER_ARN | jq -r ".SecretString")
 DB_HOST=$(echo $SECRET_VALUE | jq -r ".db_host")
 DB_USER=$(echo $SECRET_VALUE | jq -r ".db_user")
 DB_PASSWD=$(echo $SECRET_VALUE | jq -r ".db_password")

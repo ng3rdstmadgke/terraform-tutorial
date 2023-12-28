@@ -1,16 +1,20 @@
+// VPCのID
 vpc_id = "vpc-xxxxxxxxxxxxxxxxx"
-
-// ALBを配置するためのサブネット (public)
-alb_subnets = ["subnet-xxxxxxxxxxxxxxxxx", "subnet-xxxxxxxxxxxxxxxxx"]
 
 // ECSタスク・データベースを配置するためのサブネット (private)
 subnets = ["subnet-xxxxxxxxxxxxxxxxx", "subnet-xxxxxxxxxxxxxxxxx"]
 
-// ECRリポジトリ
-app_image_uri = "xxxxxxxxxxxx.dkr.ecr.ap-northeast-1.amazonaws.com/xxxxxxxxxxxxxxxxxxxxxxxxxx"
-
-cicd_artifact_bucket = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-
+// DBのユーザー名
 db_user = "xxxxxxxxxxx"
 
+// DBのパスワード
 db_password = "xxxxxxxxxxx"
+
+// アプリ・バッチで利用するコンテナイメージのURI
+app_image_uri = "xxxxxxxxxxxx.dkr.ecr.ap-northeast-1.amazonaws.com/terraform-tutorial/xxx/app"
+
+// ALBを配置するためのサブネット (public)
+alb_subnets = ["subnet-xxxxxxxxxxxxxxxxx", "subnet-xxxxxxxxxxxxxxxxx"]
+
+// CICDのアーティファクト保管用S3バケット
+cicd_artifact_bucket = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
