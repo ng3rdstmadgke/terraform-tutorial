@@ -38,3 +38,12 @@ variable "repository_name" {}
 
 // ECSのタスク定義名
 variable "ecs_task_family" {}
+
+// ECSのタスク定義のバージョン
+variable "ecs_task_revision" {}
+
+// ECSタスクのコンテナ名
+variable "container_name" {}
+
+// ECSタスクのコンテナポート
+variable "container_port" {}

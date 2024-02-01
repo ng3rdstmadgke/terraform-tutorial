@@ -58,9 +58,19 @@ phases:
       - docker push $APP_IMAGE_URI:latest
       - docker push $APP_IMAGE_URI:$IMAGE_TAG
       # Amazon ECS Blue/Green デプロイアクションに必要なファイルを生成
+      # imageDetail.json
       - printf '{"ImageURI":"%s"}' $APP_IMAGE_URI:$IMAGE_TAG > imageDetail.json
+      # appspec.yaml
       - cat tfexports/${STAGE}/appspec.yaml > appspec.yaml
-      - cat tfexports/${STAGE}/taskdef.json > taskdef.json
+      # taskdef.json
+      - TASK_DEFINITION=$(cat tfexports/${STAGE}/ecs_task.json | jq -r '.revision')
+      - |
+        aws ecs describe-task-definition \
+          --task-definition ${TASK_DEFINITION} \
+          --query 'taskDefinition' \
+          --output json |
+        jq -r '.containerDefinitions[0].image="<IMAGE1_NAME>"' \
+        > taskdef.json
       # 確認
       - cat appspec.yaml
       - cat taskdef.json

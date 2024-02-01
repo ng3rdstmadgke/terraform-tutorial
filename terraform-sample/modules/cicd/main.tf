@@ -104,6 +104,33 @@ resource "aws_codebuild_project" "this" {
   ]
 }
 
+// appspec.ymlを作成
+resource "local_file" "appspec_yml" {
+  // https://registry.terraform.io/providers/hashicorp/local/latest/docs/resources/file
+  filename = "../../../tfexports/${var.stage}/appspec.yaml"
+  content  = <<EOF
+version: 0.0
+Resources:
+  - TargetService:
+      Type: AWS::ECS::Service
+      Properties:
+        TaskDefinition: <TASK_DEFINITION>
+        LoadBalancerInfo:
+          ContainerName: "${var.container_name}"
+          ContainerPort: ${var.container_port}
+        PlatformVersion: "1.4.0"
+EOF
+}
+
+// ecs_task.jsonを作成
+resource "local_file" "ecs_task_json" {
+  // https://registry.terraform.io/providers/hashicorp/local/latest/docs/resources/file
+  filename = "../../../tfexports/${var.stage}/ecs_task.json"
+  content  = jsonencode({
+    "revision" = "${var.ecs_task_family}:${var.ecs_task_revision}"
+  })
+}
+
 
 /**
  * CodeDeploy

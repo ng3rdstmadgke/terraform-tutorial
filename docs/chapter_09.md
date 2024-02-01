@@ -66,6 +66,15 @@ variable "repository_name" {}
 
 // ECSのタスク定義名
 variable "ecs_task_family" {}
+
+// ECSのタスク定義のバージョン
+variable "ecs_task_revision" {}
+
+// ECSタスクのコンテナ名
+variable "container_name" {}
+
+// ECSタスクのコンテナポート
+variable "container_port" {}
 ```
 
 ## 2. リソース定義
@@ -682,6 +691,33 @@ resource "aws_codebuild_project" "this" {
     aws_iam_policy.codebuild_for_app_policy,
   ]
 }
+
+// appspec.ymlを作成
+resource "local_file" "appspec_yml" {
+  // https://registry.terraform.io/providers/hashicorp/local/latest/docs/resources/file
+  filename = "../../../tfexports/${var.stage}/appspec.yaml"
+  content  = <<EOF
+version: 0.0
+Resources:
+  - TargetService:
+      Type: AWS::ECS::Service
+      Properties:
+        TaskDefinition: <TASK_DEFINITION>
+        LoadBalancerInfo:
+          ContainerName: "${var.container_name}"
+          ContainerPort: ${var.container_port}
+        PlatformVersion: "1.4.0"
+EOF
+}
+
+// ecs_task.jsonを作成
+resource "local_file" "ecs_task_json" {
+  // https://registry.terraform.io/providers/hashicorp/local/latest/docs/resources/file
+  filename = "../../../tfexports/${var.stage}/ecs_task.json"
+  content  = jsonencode({
+    "revision" = "${var.ecs_task_family}:${var.ecs_task_revision}"
+  })
+}
 ```
 
 ### CodeDeployの定義
@@ -985,9 +1021,19 @@ phases:
       - docker push $APP_IMAGE_URI:latest
       - docker push $APP_IMAGE_URI:$IMAGE_TAG
       # Amazon ECS Blue/Green デプロイアクションに必要なファイルを生成
+      # imageDetail.json
       - printf '{"ImageURI":"%s"}' $APP_IMAGE_URI:$IMAGE_TAG > imageDetail.json
+      # appspec.yaml
       - cat tfexports/${STAGE}/appspec.yaml > appspec.yaml
-      - cat tfexports/${STAGE}/taskdef.json > taskdef.json
+      # taskdef.json
+      - TASK_DEFINITION=$(cat tfexports/${STAGE}/ecs_task.json | jq -r '.revision')
+      - |
+        aws ecs describe-task-definition \
+          --task-definition ${TASK_DEFINITION} \
+          --query 'taskDefinition' \
+          --output json |
+        jq -r '.containerDefinitions[0].image="<IMAGE1_NAME>"' \
+        > taskdef.json
       # 確認
       - cat appspec.yaml
       - cat taskdef.json
@@ -1033,67 +1079,9 @@ module "cicd" {
   cicd_artifact_bucket  = var.cicd_artifact_bucket
   repository_name       = local.repository_name
   ecs_task_family       = module.app.ecs_task_family
-}
-
-resource "null_resource" "make_dir" {
-  // https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource
-  triggers = {
-    always_run = timestamp()
-    stage = local.stage
-  }
-
-  // terraform apply で実行される
-  // local-exec: https://developer.hashicorp.com/terraform/language/resources/provisioners/local-exec
-  provisioner "local-exec" {
-    command = "mkdir -p ../../../tfexports/${self.triggers.stage}"
-  }
-
-  // terraform destroy で実行される
-  provisioner "local-exec" {
-    when    = destroy
-    command = "rm -rf ../../../tfexports/${self.triggers.stage}"
-  }
-}
-
-// appspec.ymlを作成
-resource "local_file" "appspec_yml" {
-  // https://registry.terraform.io/providers/hashicorp/local/latest/docs/resources/file
-  filename = "../../../tfexports/${local.stage}/appspec.yaml"
-  content  = <<EOF
-version: 0.0
-Resources:
-  - TargetService:
-      Type: AWS::ECS::Service
-      Properties:
-        TaskDefinition: <TASK_DEFINITION>
-        LoadBalancerInfo:
-          ContainerName: "${module.app.container_name}"
-          ContainerPort: ${module.app.container_port}
-        PlatformVersion: "1.4.0"
-EOF
-
-  depends_on = [null_resource.make_dir]
-}
-
-// taskdef.jsonを作成
-resource "null_resource" "run_script" {
-  // https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource
-  triggers = {
-    always_run = timestamp()
-  }
-
-  // terraform apply で実行される
-  provisioner "local-exec" {
-    command = <<EOF
-aws ecs describe-task-definition \
-  --task-definition ${module.app.ecs_task_family}:${module.app.ecs_task_revision} \
-  --query 'taskDefinition' \
-  --output json |
-jq -r '.containerDefinitions[0].image="<IMAGE1_NAME>"' \
-> ../../../tfexports/${local.stage}/taskdef.json
-EOF
-  }
-  depends_on = [null_resource.make_dir]
+  ecs_task_revision     = module.app.ecs_task_revision
+  container_name        = module.app.container_name
+  container_port        = module.app.container_port
 }
 ```
 

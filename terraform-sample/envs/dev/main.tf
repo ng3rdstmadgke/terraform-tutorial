@@ -234,65 +234,7 @@ module "cicd" {
   cicd_artifact_bucket  = var.cicd_artifact_bucket
   repository_name       = local.repository_name
   ecs_task_family       = module.app.ecs_task_family
-}
-
-resource "null_resource" "make_dir" {
-  // https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource
-  triggers = {
-    always_run = timestamp()
-    stage = local.stage
-  }
-
-  // terraform apply で実行される
-  // local-exec: https://developer.hashicorp.com/terraform/language/resources/provisioners/local-exec
-  provisioner "local-exec" {
-    command = "mkdir -p ../../../tfexports/${self.triggers.stage}"
-  }
-
-  // terraform destroy で実行される
-  provisioner "local-exec" {
-    when    = destroy
-    command = "rm -rf ../../../tfexports/${self.triggers.stage}"
-  }
-}
-
-// appspec.ymlを作成
-resource "local_file" "appspec_yml" {
-  // https://registry.terraform.io/providers/hashicorp/local/latest/docs/resources/file
-  filename = "../../../tfexports/${local.stage}/appspec.yaml"
-  content  = <<EOF
-version: 0.0
-Resources:
-  - TargetService:
-      Type: AWS::ECS::Service
-      Properties:
-        TaskDefinition: <TASK_DEFINITION>
-        LoadBalancerInfo:
-          ContainerName: "${module.app.container_name}"
-          ContainerPort: ${module.app.container_port}
-        PlatformVersion: "1.4.0"
-EOF
-
-  depends_on = [null_resource.make_dir]
-}
-
-// taskdef.jsonを作成
-resource "null_resource" "run_script" {
-  // https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource
-  triggers = {
-    always_run = timestamp()
-  }
-
-  // terraform apply で実行される
-  provisioner "local-exec" {
-    command = <<EOF
-aws ecs describe-task-definition \
-  --task-definition ${module.app.ecs_task_family}:${module.app.ecs_task_revision} \
-  --query 'taskDefinition' \
-  --output json |
-jq -r '.containerDefinitions[0].image="<IMAGE1_NAME>"' \
-> ../../../tfexports/${local.stage}/taskdef.json
-EOF
-  }
-  depends_on = [null_resource.make_dir]
+  ecs_task_revision     = module.app.ecs_task_revision
+  container_name        = module.app.container_name
+  container_port        = module.app.container_port
 }
