@@ -17,7 +17,7 @@ job_baseモジュールで作成したコンピューティング環境で動作
 `scheduled_job` モジュールを定義します。
 
 ```bash
-STAGE="your_name"
+STAGE="ステージ名"
 mkdir -p ${CONTAINER_PROJECT_ROOT}/terraform/modules/scheduled_job
 touch ${CONTAINER_PROJECT_ROOT}/terraform/modules/scheduled_job/{main.tf,variables.tf,outputs.tf,iam.tf}
 ```

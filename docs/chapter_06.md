@@ -23,7 +23,7 @@ Chapter6 ロードバランサー
 
 
 ```bash
-STAGE="your_name"
+STAGE="ステージ名"
 mkdir -p ${CONTAINER_PROJECT_ROOT}/terraform/modules/alb
 touch ${CONTAINER_PROJECT_ROOT}/terraform/modules/alb/{main.tf,variables.tf,outputs.tf,iam.tf}
 ```

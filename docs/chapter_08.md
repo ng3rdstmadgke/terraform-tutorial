@@ -13,7 +13,7 @@ Chapter8 オートスケーリング
 ECSリソースを定義する `monitoring` モジュールを定義します。
 
 ```bash
-STAGE="your_name"
+STAGE="ステージ名"
 mkdir -p ${CONTAINER_PROJECT_ROOT}/terraform/modules/monitoring
 touch ${CONTAINER_PROJECT_ROOT}/terraform/modules/monitoring/{main.tf,variables.tf,outputs.tf,iam.tf}
 ```

@@ -55,13 +55,15 @@ devcontainerのプラグインをインストールしてください。
 
 ```bash
 # 開発shellへのログイン
-./bin/run.sh -m shell
+$CONTAINER_PROJECT_ROOT/bin/run.sh -m shell
 
 # データベースの初期化
 ./bin/init-database.sh
 
-# テーブルの確認
+# mysqlにログイン
 ./bin/mysql.sh
+
+# テーブルの確認
 MySQL [local]> SHOW TABLES;
 +-----------------+
 | Tables_in_local |
@@ -70,8 +72,9 @@ MySQL [local]> SHOW TABLES;
 | jobs            |
 +-----------------+
 2 rows in set (0.001 sec)
-> exit
 
+# MySQLからログアウト
+MySQL [local]> exit
 
 
 # 開発shellからのログアウト
@@ -104,7 +107,7 @@ exit
 
 ```bash
 # 変数定義
-STAGE=dev
+STAGE="ステージ名"  # ステージ名は半角英数字で5文字まで
 AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
 AWS_REGION="ap-northeast-1"
 
@@ -141,7 +144,7 @@ terraformのtfstateを管理するS3バケットを作成します。
 ```bash
 # tfstateファイルをS3で管理する
 # https://developer.hashicorp.com/terraform/language/settings/backends/s3
-TFSTATE_BUCKET="xxxxxxxxxxxxxxxxx"
+TFSTATE_BUCKET="xxxxxxxxxxxxxxxxx"  # 控えておいてください
 
 aws s3api create-bucket \
   --bucket $TFSTATE_BUCKET \
@@ -158,7 +161,7 @@ terraformを複数個所から同時にデプロイできないように、dynam
 # tfstateファイルのロック情報をDynamoDBで管理する
 # https://developer.hashicorp.com/terraform/language/settings/backends/s3#dynamodb-state-locking
 
-TFSTATE_LOCK_TABLE="xxxxxxxxxxxxxxxxx"
+TFSTATE_LOCK_TABLE="xxxxxxxxxxxxxxxxx"  # 控えておいてください
 
 aws dynamodb create-table \
     --table-name $TFSTATE_LOCK_TABLE \
@@ -173,7 +176,7 @@ aws dynamodb create-table \
 「Chapter9 CICD」で作成するCodePipelineのアーティファクトを保存するためのバケットを作成します。
 
 ```bash
-CICD_BUCKET="xxxxxxxxxxxxxxxxx"
+CICD_BUCKET="xxxxxxxxxxxxxxxxx"  # 控えておいてください
 
 aws s3api create-bucket \
   --bucket $CICD_BUCKET \

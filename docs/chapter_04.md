@@ -17,7 +17,7 @@ job_baseモジュールで作成したコンピューティング環境で動作
 `on_demand_job` モジュールを定義します。
 
 ```bash
-STAGE="your_name"
+STAGE="ステージ名"
 mkdir -p ${CONTAINER_PROJECT_ROOT}/terraform/modules/on_demand_job
 touch ${CONTAINER_PROJECT_ROOT}/terraform/modules/on_demand_job/{main.tf,variables.tf,outputs.tf,iam.tf}
 ```

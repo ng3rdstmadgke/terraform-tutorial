@@ -13,7 +13,7 @@ Chapter7 ECS
 ECSリソースを定義する `app` モジュールを定義します。
 
 ```bash
-STAGE="your_name"
+STAGE="ステージ名"
 mkdir -p ${CONTAINER_PROJECT_ROOT}/terraform/modules/app
 touch ${CONTAINER_PROJECT_ROOT}/terraform/modules/app/{main.tf,variables.tf,outputs.tf,iam.tf}
 ```
@@ -780,7 +780,7 @@ terraform apply -auto-approve
 
 ```bash
 # デプロイした環境変数を利用して、開発shellを立ち上げ
-./bin/run.sh -m shell -e env/${STAGE}.env 
+$CONTAINER_PROJECT_ROOT/bin/run.sh -m shell -e $CONTAINER_PROJECT_ROOT/env/${STAGE}.env 
 
 # データベースの初期化
 ./bin/init-database.sh

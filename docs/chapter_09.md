@@ -13,7 +13,7 @@ Chapter9 CICD
 ECSリソースを定義する `cicd` モジュールを定義します。
 
 ```bash
-STAGE="your_name"
+STAGE="ステージ名"
 mkdir -p ${CONTAINER_PROJECT_ROOT}/terraform/modules/cicd/resources
 touch ${CONTAINER_PROJECT_ROOT}/terraform/modules/cicd/{main.tf,variables.tf,outputs.tf,iam.tf}
 touch ${CONTAINER_PROJECT_ROOT}/terraform/modules/cicd/resources/buildspec.yml
@@ -1106,6 +1106,7 @@ terraform apply -auto-approve
 このファイルをcommitし、EventBridgeで監視しているブランチにpushします。
 
 ```bash
+cd $CONTAINER_PROJECT_ROOT
 git add .
 git commit -m "tfexports"
 git push codecommit main:${STAGE}

@@ -331,11 +331,10 @@ terraform force-unlock <LOCK_ID>
     サービス毎・ライフサイクル毎にある程度リソースをグループ化したモジュールを配置
 
 ```bash
-# ステージ名は半角英数字で5文字まで
-STAGE="dev"
+STAGE="ステージ名"
 
 # プロジェクトディレクトリ作成
-mkdir -p "terraform/envs/${STAGE}" "terraform/modules"
+mkdir -p "$CONTAINER_PROJECT_ROOT/terraform/envs/${STAGE}" "$CONTAINER_PROJECT_ROOT/terraform/modules"
 ```
 
 ## .gitignore配置
@@ -486,7 +485,7 @@ sns topic を作成する `base` モジュールを作成してみましょう�
 `base` モジュールを作成します。
 
 ```bash
-STAGE="your_name"
+STAGE="ステージ名"
 mkdir -p ${CONTAINER_PROJECT_ROOT}/terraform/modules/base
 touch ${CONTAINER_PROJECT_ROOT}/terraform/modules/base/{main.tf,variables.tf,outputs.tf}
 ```
