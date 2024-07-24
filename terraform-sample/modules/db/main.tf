@@ -10,14 +10,11 @@ resource "aws_rds_cluster" "aurora_serverless_mysql80" {
   engine = "aurora-mysql"
   // 利用可能なバージョンの一覧
   /*
-    aws rds describe-orderable-db-instance-options \
+    aws rds describe-db-engine-versions \
       --engine aurora-mysql \
-      --db-instance-class db.serverless \
-      --region ap-northeast-1 \
-      --query 'OrderableDBInstanceOptions[].[EngineVersion]' \
-      --output text
+      --query 'DBEngineVersions[].EngineVersion' | jq -r ".[]"
   */
-  engine_version = "8.0.mysql_aurora.3.05.0"
+  engine_version = "8.0.mysql_aurora.3.07.1"
 
   database_name   = var.db_name
   master_username = var.db_user
