@@ -35,8 +35,9 @@
    */
   // コンテナが初めて起動した直後に実行するコマンド
   "onCreateCommand": "/bin/bash .devcontainer/on-create.sh",
+
   // devcontainerにアタッチした直後に実行するコマンド
-  "postAttachCommand": "cat ~/.docker/config.json | jq -r 'del(.credsStore)' | tee ~/.docker/config.json",  // credsStoreを削除しないとECRへのログインができない
+  "postAttachCommand": "/bin/bash .devcontainer/post-attach.sh",  // credsStoreがあるとリビルド・ECRへのログインができない
 
 
   /**

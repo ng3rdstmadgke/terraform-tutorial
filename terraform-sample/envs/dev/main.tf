@@ -8,7 +8,7 @@ terraform {
   }
 
   // terraformのバージョン指定
-  required_version = ">= 1.2.0"
+  required_version = ">= 1.8.0"
 
   // tfstateファイルをs3で管理する: https://developer.hashicorp.com/terraform/language/settings/backends/s3
   backend "s3" {

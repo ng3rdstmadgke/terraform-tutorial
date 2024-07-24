@@ -29,10 +29,11 @@ RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2
     unzip awscliv2.zip && \
     ./aws/install
 
-# terraform インストール
-RUN wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg && \
-    echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list && \
-    apt-get update && apt-get install -y terraform
+# https://developer.hashicorp.com/terraform/install
+RUN wget https://releases.hashicorp.com/terraform/1.8.5/terraform_1.8.5_linux_amd64.zip && \
+    unzip terraform_1.8.5_linux_amd64.zip && \
+    mv terraform /usr/local/bin/ && \
+    terraform -install-autocomplete 
 
 COPY app/requirements.txt /tmp/requirements.txt
 RUN pip install -r /tmp/requirements.txt

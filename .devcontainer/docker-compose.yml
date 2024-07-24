@@ -9,7 +9,6 @@ services:
       - ..:/terraform-tutorial:cached
       - ~/.aws:/home/vscode/.aws:cached
       - ~/.ssh:/home/vscode/.ssh:cached
-      - ~/.docker:/home/vscode/.docker:cached
     command: sleep infinity
     networks:
       br-terraform-tutorial:
