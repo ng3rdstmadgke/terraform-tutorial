@@ -477,6 +477,7 @@ resource "aws_sfn_state_machine" "on_demand_job" {
         "ExtractInputParameters": {
           "Type": "Pass",
           "Next": "BatchGroup",
+          "InputPath": "$[0]",
           "Parameters":{
             "metadata": {
               "app_name": var.app_name,
@@ -514,7 +515,7 @@ resource "aws_sfn_state_machine" "on_demand_job" {
                     // Parameters: https://docs.aws.amazon.com/batch/latest/APIReference/API_SubmitJob.html#Batch-SubmitJob-request-parameters
                     "Parameters": {
                       // SQSメッセージの先頭要素のbodyを取得
-                      "sqs_message_body.$": "$.input[0].body"
+                      "sqs_message_body.$": "$.input.body"
                     },
                     // ContainerOverrides: https://docs.aws.amazon.com/batch/latest/APIReference/API_ContainerOverrides.html
                     "ContainerOverrides": {
